@@ -1,0 +1,15 @@
+// Localhost only: ongoing quote polls must preserve unchanged execution-history DOM.
+import {mkdir,writeFile} from 'node:fs/promises';import {resolve,join} from 'node:path';import {pathToFileURL} from 'node:url';import assert from 'node:assert/strict';
+if(!process.env.PLAYWRIGHT_MODULE)throw Error('Set PLAYWRIGHT_MODULE.');
+const {chromium}=await import(pathToFileURL(resolve(process.env.PLAYWRIGHT_MODULE)).href),out=resolve(process.env.BROWSER_VERIFY_OUTPUT??'history-stability-verification');await mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true,channel:'chromium',...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+try{
+ const context=await browser.newContext({viewport:{width:1280,height:1250}});await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4320'?route.continue():route.abort());const page=await context.newPage();await page.goto('http://127.0.0.1:4320/trade/btc');
+ await page.locator('#price').fill('80000');await page.locator('#submit').click();await page.locator('#submit:enabled').waitFor();await page.getByText('Execution history',{exact:true}).click();const history=page.locator('#history');await history.getByText('long · watching',{exact:true}).waitFor();
+ const selected=await history.evaluate(el=>{globalThis.fixtureHistoryRow=el.firstElementChild;const text=el.querySelector('b').firstChild,range=document.createRange();range.selectNodeContents(text);const selection=el.getRootNode().getSelection?.()??window.getSelection();selection.removeAllRanges();selection.addRange(range);return String(selection);});assert.equal(selected,'long · watching');
+ // Invoke the fixture's quote change without a pointer action clearing selection.
+ await page.locator('#precisionNear').evaluate(el=>el.onclick());await page.locator('#live').filter({hasText:'83,001'}).waitFor();await page.waitForTimeout(1200);
+ const unchanged=await history.evaluate(el=>({sameRow:globalThis.fixtureHistoryRow===el.firstElementChild&&globalThis.fixtureHistoryRow.isConnected,selection:String(el.getRootNode().getSelection?.()??window.getSelection())}));assert.equal(unchanged.sameRow,true,'unchanged history row must survive price polls');assert.equal(unchanged.selection,selected,'selected history text must survive price polls');await history.screenshot({path:join(out,'selected-history.png')});
+ await page.getByRole('button',{name:'Cancel order',exact:true}).click();await history.getByText('long · cancelled',{exact:true}).waitFor();assert.equal(await history.getByText('long · watching',{exact:true}).count(),0);assert.match(await page.locator('#fixtureStatus').innerText(),/^0 native submissions/);
+ await writeFile(join(out,'verification.json'),JSON.stringify({passed:true,simulated:true,historyRowRetainedAcrossPricePolls:true,textSelectionRetained:true,livePriceStillUpdates:true,realOrderStateChangesStillRender:true,simulatedNativeEntries:0,simulatedNativeCloses:0,fundedExecutionVerified:false},null,2)+'\n');console.log(JSON.stringify({passed:true,simulated:true,output:out}));
+}finally{await browser.close();}

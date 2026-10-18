@@ -1,0 +1,16 @@
+// Localhost only: live refreshes preserve selected stable text; keyboard actions remain explicit.
+import {mkdir,writeFile} from 'node:fs/promises';import {resolve,join} from 'node:path';import {pathToFileURL} from 'node:url';import assert from 'node:assert/strict';
+if(!process.env.PLAYWRIGHT_MODULE)throw Error('Set PLAYWRIGHT_MODULE.');
+const {chromium}=await import(pathToFileURL(resolve(process.env.PLAYWRIGHT_MODULE)).href),out=resolve(process.env.BROWSER_VERIFY_OUTPUT??'pair-selection-verification');await mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true,channel:'chromium',...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+try{
+ const context=await browser.newContext({viewport:{width:1280,height:1100}});await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4320'?route.continue():route.abort());const page=await context.newPage();await page.goto('http://127.0.0.1:4320/trade/btc?scenario=pair');await page.locator('#pairOpen:enabled').waitFor();
+ await page.locator('#pairOpen').focus();await page.keyboard.press('Enter');await page.locator('#pairStatus').filter({hasText:'Both legs visible'}).waitFor({timeout:8000});assert.match(await page.locator('#fixtureStatus').innerText(),/^2 simulated entries · 0 simulated closes/);
+ const layout=await page.locator('#pairOpen').evaluate(el=>{const root=el.getRootNode();root.host.style.width='220px';const box=root.querySelector('.box');return {clientWidth:box.clientWidth,scrollWidth:box.scrollWidth};});assert.ok(layout.scrollWidth<=layout.clientWidth,'compact card must not overflow horizontally');
+ const preserved=[];
+ for(const id of ['pairLong','pairShort','pairWallet','pairStatus']){
+  const target=page.locator('#'+id);const selected=await target.evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);const selection=el.getRootNode().getSelection();selection.removeAllRanges();selection.addRange(range);return selection.toString();});assert.ok(selected.length>0);await page.waitForTimeout(1300);assert.equal(await target.evaluate(el=>el.getRootNode().getSelection().toString()),selected,id+' selection must survive unchanged live redraws');preserved.push(id);
+ }
+ const host=await page.locator('#pairOpen').evaluateHandle(el=>el.getRootNode().host);await host.asElement().screenshot({path:join(out,'compact-live-pair.png')});await page.locator('#pairClose').focus();await page.keyboard.press('Enter');await page.locator('#pairStatus').filter({hasText:'Pair closed in two complete'}).waitFor({timeout:8000});assert.match(await page.locator('#fixtureStatus').innerText(),/^2 simulated entries · 2 simulated closes/);assert.equal(await page.locator('#pairLong').innerText(),'Closed in Positions');assert.equal(await page.locator('#pairShort').innerText(),'Closed in Positions');
+ await writeFile(join(out,'verification.json'),JSON.stringify({passed:true,simulated:true,unchangedSelectionsPreserved:preserved,compactLayout:layout,keyboardOpenAndClose:true,changedLegStateStillRenders:true,simulatedEntries:2,simulatedCloses:2,fundedExecutionVerified:false},null,2)+'\n');console.log(JSON.stringify({passed:true,simulated:true,output:out}));
+}finally{await browser.close();}

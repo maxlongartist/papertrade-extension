@@ -1,0 +1,5 @@
+import {createPressureFeed} from './extension/congestion.js';
+const previewPressure=createPressureFeed();
+import http from 'node:http';import {readFile} from 'node:fs/promises';import {resolve,extname} from 'node:path';
+const root=process.cwd(),types={'.html':'text/html','.js':'text/javascript','.json':'application/json'};
+http.createServer(async(req,res)=>{try{const url=new URL(req.url,'http://127.0.0.1:4320');if(url.pathname==='/preview-pressure'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(previewPressure.get()));return;}const path=url.pathname.startsWith('/extension/')?resolve(root,'.'+url.pathname):resolve(root,'preview/index.html');if(!path.startsWith(root+'/'))throw Error();res.writeHead(200,{'Content-Type':types[extname(path)]??'text/plain','Cache-Control':'no-store'});res.end(await readFile(path));}catch{res.writeHead(404);res.end();}}).listen(4320,'127.0.0.1',()=>console.log('Extension workflow test harness: http://127.0.0.1:4320/trade/btc'));

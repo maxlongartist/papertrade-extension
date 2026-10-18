@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.codebase-memory/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.log
+verification.json
+*-verification/
+test-results/
+playwright-report/

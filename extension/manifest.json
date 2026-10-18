@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Papertrade \u00b7 Manual Pair & Limits",
+  "version": "0.7.64",
+  "minimum_chrome_version": "116",
+  "description": "One-click manual long/short pairs, close-pair controls, limit entries and optional TP/SL on Papertrade.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://exchange.papertrade.xyz/*",
+    "https://api.hyperliquid.xyz/*",
+    "https://stream.papertrade.xyz/*"
+  ],
+  "background": {
+    "service_worker": "worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Papertrade Manual Pair & Limits",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://exchange.papertrade.xyz/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "papertrade-extension",
+  "version": "0.7.64",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "node build.mjs",
+    "preview": "node preview-server.mjs",
+    "verify:browser": "node scripts/verify-browser.mjs",
+    "verify:pair-ui": "node scripts/verify-pair-ui.mjs",
+    "release": "node scripts/package-release.mjs",
+    "verify:position-health": "node scripts/verify-position-health.mjs",
+    "verify:recovery-selection": "node scripts/verify-recovery-selection.mjs",
+    "verify:position-editor": "node scripts/verify-position-editor.mjs",
+    "verify:entry-editor": "node scripts/verify-entry-editor.mjs",
+    "verify:edit-conflicts": "node scripts/verify-edit-conflicts.mjs",
+    "verify:watch-storage": "node scripts/verify-watch-storage.mjs",
+    "verify:preflight-edits": "node scripts/verify-preflight-edits.mjs",
+    "verify:pair-close-status": "node scripts/verify-pair-close-status.mjs",
+    "verify:pair-storage": "node scripts/verify-pair-storage.mjs",
+    "verify:entry-expiry": "node scripts/verify-entry-expiry.mjs",
+    "verify:entry-cancel-edit": "node scripts/verify-entry-cancel-edit.mjs",
+    "verify:history-stability": "node scripts/verify-history-stability.mjs",
+    "verify:entry-edit-size": "node scripts/verify-entry-edit-size.mjs",
+    "verify:bracket-conflicts": "node scripts/verify-bracket-conflicts.mjs",
+    "verify:position-wallet": "node scripts/verify-position-wallet.mjs",
+    "verify:pair-wallet": "node scripts/verify-pair-wallet.mjs",
+    "verify:pair-state-health": "node scripts/verify-pair-state-health.mjs",
+    "verify:pair-response-order": "node scripts/verify-pair-response-order.mjs",
+    "verify:pair-reservation-close": "node scripts/verify-pair-reservation-close.mjs",
+    "verify:pair-storage-integrity": "node scripts/verify-pair-storage-integrity.mjs",
+    "verify:pair-selection": "node scripts/verify-pair-selection.mjs",
+    "verify:extension-reload": "node scripts/verify-extension-reload.mjs",
+    "verify:panel-connection": "node scripts/verify-panel-connection.mjs",
+    "verify:chart-drafts": "node scripts/verify-chart-drafts.mjs",
+    "verify:duplicate-copies": "node scripts/verify-duplicate-copies.mjs",
+    "verify:layout-stability": "node scripts/verify-layout-stability.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
