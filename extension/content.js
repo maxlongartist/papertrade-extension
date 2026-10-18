@@ -22,6 +22,12 @@ let queueHost,disposeQueue,host, pairHost, disposePair, dispose, disposePosition
 function syncRoute() {
   const match = /^\/trade\/([a-z][a-z0-9]{0,15})(\/|$)/.exec(location.pathname), panel = document.querySelector('#panelScroll');
   if (!match || !panel) { if (host) host.hidden = true; if(pairHost)pairHost.hidden=true;if(queueHost)queueHost.hidden=true;if(monitorHost)monitorHost.hidden=true; return; }
+  if(!document.getElementById('paperpilot-layout')){
+    const layout=document.createElement('style');layout.id='paperpilot-layout';
+    // Native inline widths from the user's resize handle still take precedence.
+    layout.textContent='@media (min-width:761px){#page-trade .panel-col:has(#panelScroll){width:clamp(340px,25vw,420px)}}';
+    document.head.append(layout);
+  }
   const market = match[1].toUpperCase();
   if(pageInstance.claimed&&!setupReady){
     if(!setupLoaded)return;
