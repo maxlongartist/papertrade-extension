@@ -12,7 +12,7 @@ No private key is collected. Connect and authorize your wallet through Papertrad
 
 ## Install
 
-**Start here: [Installation, updating, and troubleshooting](docs/INSTALL.md).**
+**Start here: [Installation, updating, and troubleshooting](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/INSTALL.md).**
 
 For a ready-to-load package, download `papertrade-manual-pair-vVERSION.zip` from [Releases](https://github.com/maxlongartist/papertrade-extension/releases), extract it, and select the extracted folder with **Load unpacked** at `chrome://extensions`. The selected folder must directly contain `manifest.json`.
 
@@ -64,7 +64,7 @@ BROWSER_EXECUTABLE=/absolute/path/to/chrome \
 npm run verify:layout-stability
 ```
 
-Other `verify:*` commands are listed in `package.json`. Some inspect public signed-out venue pages in temporary profiles; these are not funded execution certification. Historical implementation and verification details are in [development history](docs/DEVELOPMENT-HISTORY.md).
+Other `verify:*` commands are listed in `package.json`. Some inspect public signed-out venue pages in temporary profiles; these are not funded execution certification. Historical implementation and verification details are in [development history](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/DEVELOPMENT-HISTORY.md).
 
 `npm run release` builds, runs the suite, and creates a ZIP with `manifest.json` at its root. It writes versioned packages beside the repository and in `~/Downloads`, plus a ZIP-only latest alias. Existing versioned packages are immutable; increment the version in `package.json`, `package-lock.json`, and `extension/manifest.json` before changing a released payload. It does not overwrite installed extension folders or read bot credentials.
 
