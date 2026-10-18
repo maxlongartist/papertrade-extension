@@ -2,7 +2,7 @@
 
 **You only need Chrome and the ZIP download. No coding or terminal commands.**
 
-1. **[Click here to open the download page](https://github.com/maxlongartist/papertrade-extension/releases/latest).**
+1. **[Click here to open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.69).**
 2. Find **Assets**. Click it if the file list is closed.
 3. Download **`papertrade-manual-pair-v….zip`**. Do not choose either “Source code” file.
 4. **Unzip the download.** On a Mac, double-click the ZIP. On Windows, right-click it and choose **Extract All**.
@@ -13,11 +13,13 @@
 9. Select the extracted folder. **That folder must directly contain `manifest.json`.** If you see another folder inside it, open that inner folder and check there.
 10. Open **[Papertrade](https://exchange.papertrade.xyz/trade/btc)** and refresh the page. Connect your wallet on Papertrade as usual.
 
-On your first trading-page visit, read the notice, tick the agreement box, then click **Agree and show controls**.
+On your first trading-page visit, read the notice, tick the agreement box, then click **Continue to trading controls**.
 
 **You're ready.** Look below Papertrade's normal trading controls for Network queue, Manual pair, and Limit entry. The extension does not need your private key.
 
 **Next: [See how to use it, with screenshots](../README.md#open-and-close-a-long--short-pair).**
+
+**Execution depends on Papertrade congestion.** A trigger reaching its price does not mean the trade has filled. Busy queues can delay entries, pair opens/closes, stop losses and take profits; prices can move or liquidation can happen before execution. The extension cannot bypass the queue or guarantee a price or execution time.
 
 ## If something goes wrong
 
@@ -27,7 +29,7 @@ You selected the wrong folder, or the ZIP is still zipped. Unzip it, then select
 
 **I downloaded “Source code” and can't find the right files.**
 
-Go back to [the download page](https://github.com/maxlongartist/papertrade-extension/releases/latest). Get `papertrade-manual-pair-v….zip` under Assets instead.
+Go back to [the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.69). Get `papertrade-manual-pair-v….zip` under Assets instead.
 
 **Nothing appears on Papertrade.**
 

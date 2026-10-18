@@ -6,7 +6,7 @@ This independent extension adds manual pair controls and conditional trading too
 
 ## No developer data collection
 
-We do not collect usage analytics or automatically receive your wallet details, balances, positions, order watches or trading history. There is no developer-operated data collection server. Trading records stay locally in your Chrome profile unless you choose to export and share them.
+**We do not collect your data.** We have no usage analytics or developer telemetry and do not automatically receive your wallet details, balances, positions, order watches or trading history. There is no developer-operated data collection server. Trading records stay locally in your Chrome profile unless you choose to export and share them.
 
 ## Information used locally by the extension
 

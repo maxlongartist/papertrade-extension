@@ -4,9 +4,15 @@
 
 Adds **Open long + short**, **Close pair**, **limit entries**, and **stop loss / take profit** to Papertrade.
 
+## Privacy
+
+**We do not collect your data.** There is no developer analytics, telemetry, advertising tracking, or automatic upload of wallet details or trading history. The extension reads the Papertrade page to operate your controls and stores trading records locally in your browser. Papertrade and Hyperliquid receive the normal requests needed to provide their services; anything you voluntarily share in a support report is separate.
+
+**Execution depends on Papertrade congestion.** A trigger reaching its price does not mean the trade has filled. Busy queues can delay entries, pair opens/closes, stop losses and take profits; prices can move or liquidation can happen before execution. The extension cannot bypass the queue or guarantee a price or execution time.
+
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/latest).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.69).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.

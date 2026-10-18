@@ -19,7 +19,9 @@ Independent beta trading controls for Papertrade:
 • Set conditional BTC/ETH entries and optional stop loss / take profit, including protection for existing positions.
 • Inspect position IDs, execution observations, history and advisory network queue data.
 
-We do not collect usage analytics or automatically receive your wallet details or trading history. Saved trading records are encrypted locally in your Chrome profile. The extension does not read private keys. Connect and authorize your wallet through Papertrade.
+We do not collect your data: no usage analytics, developer telemetry, or automatic upload of wallet details or trading history. Saved trading records are encrypted locally in your Chrome profile. The extension does not read private keys. Connect and authorize your wallet through Papertrade.
+
+Execution depends on Papertrade congestion. A trigger reaching its price does not mean the trade has filled. Busy queues can delay entries, pair opens/closes, stop losses and take profits; prices can move or liquidation can happen before execution. The extension cannot bypass the queue or guarantee a price or execution time.
 
 Keep Chrome and the trading tab open, native Positions visible, and your wallet authorized. Triggers request market actions, not exchange-hosted limit/stop orders. Prices, timing, fills, profits and protection are not guaranteed. A long/short pair uses separate requests and can still lose money. If a submission is unconfirmed, check native Positions and Status before trying again.
 
