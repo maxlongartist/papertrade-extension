@@ -1,81 +1,65 @@
 # Papertrade · Manual Pair & Limits
 
-Chrome extension that adds manual long/short pairs, conditional entries, and stop-loss / take-profit controls to [Papertrade](https://exchange.papertrade.xyz/).
+Adds **Open long + short**, **Close pair**, **limit entries**, and **stop loss / take profit** to Papertrade.
 
-- **Manual pair:** one click requests a long and short using the native asset, margin per leg, and leverage. Close pair targets the two tracked positions, including identified late fills.
-- **Conditional entries:** limit-price-or-better and near-target modes, editable tolerance, editing and cancellation.
-- **Position protection:** optional SL/TP for extension entries or an existing native position; configurable early trigger.
-- **Visibility:** live price references, advisory network queue, pair state, history export, and stable live-text areas.
-- **Optional donations:** a public address and copy button above Network queue.
+## Install it — no coding needed
 
-No private key is collected. Connect and authorize your wallet through Papertrade's own interface.
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/latest).**
+2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
+3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
+4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
+5. Turn on **Developer mode** in the top-right corner.
+6. Click **Load unpacked**. Choose the extracted folder. It should have a file called **`manifest.json`** directly inside it.
+7. Open **[Papertrade](https://exchange.papertrade.xyz/trade/btc)** and refresh the page. Connect your wallet on Papertrade as usual.
 
-## Install
+**Done.** The new controls appear below Papertrade's normal trading controls. You do not need to enter a private key.
 
-**Start here: [Installation, updating, and troubleshooting](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/INSTALL.md).**
+Stuck? See the short [installation help](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/INSTALL.md).
 
-For a ready-to-load package, download `papertrade-manual-pair-vVERSION.zip` from [Releases](https://github.com/maxlongartist/papertrade-extension/releases), extract it, and select the extracted folder with **Load unpacked** at `chrome://extensions`. The selected folder must directly contain `manifest.json`.
+## Open and close a long + short pair
 
-GitHub's green **Code → Download ZIP** contains source code, not a built extension. Build that source using the developer instructions below.
+1. On Papertrade, choose your coin, margin, and leverage as usual.
+2. Open Papertrade's **Positions** tab and leave it visible. Start with no open positions or pending trades.
+3. In **Manual pair**, check the amount. **“Per leg” means per side:** $10 per leg uses $20 total.
+4. Click **Open long + short** once. Wait for both the Long and Short boxes to show position IDs.
+5. When you want to exit, click **Close pair**. Check Positions to confirm both have closed.
 
-## Use
+**Button greyed out?** Read the orange message underneath it. In the screenshot below, you need to open Papertrade's **Positions** tab.
 
-1. Open a supported native market route, such as `https://exchange.papertrade.xyz/trade/btc`. Use the English desktop interface, connect your wallet, and keep native Positions visible.
-2. For a manual pair, start with no open positions or pending requests. Choose margin **per leg** and leverage in Papertrade's native ticket. Check the displayed total margin and readiness reason, then click **Open long + short** once.
-3. Inspect the per-leg IDs and status. Click **Close pair** to request closure of those tracked legs. There is no repetition or automatic holding timer.
-4. For a conditional entry, choose side, price, behavior, and tolerance, optionally enter SL/TP, then save the trigger. Use its **Cancel order** control to cancel a waiting entry. A submitted venue action cannot be recalled by cancelling a watch.
-5. To protect an existing position, use **Add/Edit SL/TP** on its native row or **SL / TP for an existing position** in the extension. Save explicitly applies the protection and may immediately request Close if a threshold is already crossed. Removing protection leaves the position open.
+[![Network queue and Manual pair controls on Papertrade](https://raw.githubusercontent.com/maxlongartist/papertrade-extension/main/docs/images/manual-pair.png)](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/images/manual-pair.png)
 
-Manual pairs use native market routes with standard rendered position rows. Conditional entries and SL/TP currently support BTC/ETH. Saved tracking is bound to the originating wallet, market, and tab session. Restore can reconnect known position IDs after validation; it does not open a new trade.
+The **Network queue** box estimates how busy Papertrade is. It does not tell you exactly when your trade will finish. A pair opens only when you click; it does not automatically repeat.
 
-## Execution limits
+## Set a limit entry, stop loss, or take profit
 
-These are **browser-monitored conditional market actions**, not exchange-hosted limit or stop orders. Keep Chrome, the relevant trading tab, native Positions, and wallet authorization available. Closing the tab, stale data, wallet prompts, a changed page layout, or relayer congestion can prevent or delay execution. Tight entry tolerance and early SL/TP triggers do not guarantee a fill price.
+1. In **Limit entry**, choose **Long** or **Short**.
+2. Type your entry price into **Limit price · USD**. With the default **Limit price or better**, Long waits for that price or lower; Short waits for that price or higher.
+3. **Entry tolerance · USD** is the allowed worse price just before the extension clicks. The final trade price can still differ.
+4. **Stop loss** asks to exit when the price moves against you; **take profit** asks to exit when it moves in your favor. Want either one? Open **TP / SL · optional** and enter your **Stop loss price** and/or **Take profit price**. These fields take the coin's price, not your desired profit or loss amount.
+5. **Trigger exits early · USD** tells the extension to request the exit that many dollars before your SL/TP price. It cannot guarantee the final exit price.
+6. Check the margin and leverage shown above the button. Click **Set long trigger** or **Set short trigger**.
 
-A pair uses two separate requests rather than an atomic hedge. Different fills can leave residual exposure. Cash break-even, token rewards, profitability, and settlement timing are not guaranteed. Gross estimates exclude fees, funding, slippage, and rewards. An unknown submitted action is not automatically repeated; check native Positions and Status before intervening.
+Your saved entry appears under **Active orders**. Click **Cancel order** there to cancel an entry that is still waiting. Once a trade has been sent, cancelling a watch cannot undo it.
 
-The extension stores its watches and pair tracking in local Chrome extension storage. A separately installed copy cannot read the original copy's storage. Keep the same installed folder and extension ID when updating, and refresh Papertrade after Reload. Do not run competing trading automation.
+[![Limit entry form with optional stop loss and take profit fields](https://raw.githubusercontent.com/maxlongartist/papertrade-extension/main/docs/images/limit-entry.png)](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/images/limit-entry.png)
 
-## Develop
+**Already have a position?** Click **Add/Edit SL/TP** on its row in Positions. Or expand **SL / TP for an existing position**, click **Load open positions**, choose yours, enter the exit prices, and click **Arm SL / TP on selected position**. This protects that position without opening another one. A price already past your exit level may cause an immediate Close request.
 
-Requires Node.js 22 or newer and npm. From this repository:
+*Screenshots show v0.7.63 with example settings. Click either picture to view it full-size.*
 
-```sh
-npm ci
-npm test
-npm run build
-```
+## Keep this in mind
 
-Load the generated `dist/` folder in Chrome using the installation guide. `extension/` contains source modules; it is not the unpacked build. The build requires no wallet credentials.
+- **Keep Chrome and the Papertrade tab open, your wallet authorized, and Positions visible.** The extension cannot watch prices or request trades with the browser closed.
+- **These triggers send market orders.** The final price may differ from your target. Long and short are separate requests; a pair can still lose money.
+- **“Unconfirmed” means check Papertrade's Positions and Status.** Do not assume a missing reply means no trade was sent.
+- Limit entries and SL/TP currently support BTC and ETH. Do not run multiple copies of the extension or other trading bots alongside it.
 
-For the local simulated UI:
+## Updating later
 
-```sh
-npm run preview
-```
+Download and unzip the new version. Copy its files into the **same folder you already installed**, replacing the old files. Then click **Reload** on the extension at `chrome://extensions` and refresh Papertrade.
 
-Open `http://127.0.0.1:4320/trade/btc?scenario=pair`. This fixture uses simulated native positions/actions. Some public market/queue reads may use the network.
+**Keep that original folder and extension.** Installing another copy will not bring over your saved orders. Manage live positions in Papertrade while updating, because extension monitoring pauses during Reload.
 
-Optional browser checks require a local Playwright installation and Chrome for Testing:
+---
 
-```sh
-PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
-BROWSER_EXECUTABLE=/absolute/path/to/chrome \
-npm run verify:layout-stability
-```
-
-Other `verify:*` commands are listed in `package.json`. Some inspect public signed-out venue pages in temporary profiles; these are not funded execution certification. Historical implementation and verification details are in [development history](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/DEVELOPMENT-HISTORY.md).
-
-`npm run release` builds, runs the suite, and creates a ZIP with `manifest.json` at its root. It writes versioned packages beside the repository and in `~/Downloads`, plus a ZIP-only latest alias. Existing versioned packages are immutable; increment the version in `package.json`, `package-lock.json`, and `extension/manifest.json` before changing a released payload. It does not overwrite installed extension folders or read bot credentials.
-
-## GitHub username changes
-
-This repository uses `maxlongartist/papertrade-extension`. For an existing clone with an outdated URL:
-
-```sh
-git remote -v
-git remote set-url origin https://github.com/maxlongartist/papertrade-extension.git
-git remote -v
-```
-
-Changing a remote URL does not rewrite commit history. See [GitHub's remote-management guide](https://docs.github.com/en/get-started/git-basics/managing-remote-repositories).
+Want to build from source? See [developer notes](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/DEVELOPMENT.md).
