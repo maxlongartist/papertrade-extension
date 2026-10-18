@@ -11,6 +11,7 @@ Verified:
 - Actual two-copy extension test: one entry owner, standby blocked, final entry check after native preparation, and exact simulated Close preserved.
 - Source component layout regression at 220px, 340px and 700px; long messages remain scrollable.
 - Signed-out public-page captures provided at 1280×800. No signed-in account screenshot is part of the listing assets.
+- Real-extension uninstall/reinstall regression: old pages show refresh guidance, a fresh extension context remains readable, and refreshed signed-out pages reconnect without active orders or native actions.
 
 Packaged icons: 16/32/48/128 PNG. Listing assets: store icon, two signed-out screenshots, and 440×280 small promotional tile. Source SVG is in extension/icons.
 
