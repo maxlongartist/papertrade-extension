@@ -108,7 +108,7 @@ export async function closeNative(document, order) {
 
 export function assertFullPositions(document, {allowPending=false}={}) {
   const panel=document.querySelector('#postable.active');
-  if(!panel)throw Error('Open native Positions before using TP / SL.');
+  if(!panel)throw Error('Open Papertrade’s Positions tab and leave it visible.');
   if(panel.querySelector('.trade-account-status'))throw Error('Native account data is delayed; exits cannot bind safely.');
   const rows=[...panel.querySelectorAll('.pt-card[role="listitem"]')];
   if(!rows.length && !/No Open Positions/i.test(panel.textContent))throw Error('Native Positions is not fully loaded.');

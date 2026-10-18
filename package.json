@@ -1,6 +1,6 @@
 {
   "name": "papertrade-extension",
-  "version": "0.7.65",
+  "version": "0.7.66",
   "private": true,
   "type": "module",
   "scripts": {
@@ -35,7 +35,8 @@
     "verify:panel-connection": "node scripts/verify-panel-connection.mjs",
     "verify:chart-drafts": "node scripts/verify-chart-drafts.mjs",
     "verify:duplicate-copies": "node scripts/verify-duplicate-copies.mjs",
-    "verify:layout-stability": "node scripts/verify-layout-stability.mjs"
+    "verify:layout-stability": "node scripts/verify-layout-stability.mjs",
+    "verify:store-beta": "node scripts/verify-store-beta.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

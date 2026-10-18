@@ -17,6 +17,7 @@ try{
  context.on('console',message=>{if(message.type()==='error')browserErrors.push(message.text());});
  const worker=context.serviceWorkers()[0]??await context.waitForEvent('serviceworker',{timeout:15000});
  const extensionId=new URL(worker.url()).host;
+ const setupControl=await context.newPage();await setupControl.goto('chrome-extension://'+extensionId+'/popup.html');await setupControl.evaluate(()=>chrome.storage.local.set({setupAcknowledgementV1:{version:1,acceptedAt:Date.now()}}));await setupControl.close();
  const host=context.pages()[0]??await context.newPage();
  const second=await context.newPage();
  await Promise.all([host.goto('https://exchange.papertrade.xyz/trade/btc',{waitUntil:'domcontentloaded',timeout:30000}),second.goto('https://exchange.papertrade.xyz/trade/eth',{waitUntil:'domcontentloaded',timeout:30000})]);

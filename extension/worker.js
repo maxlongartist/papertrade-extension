@@ -1,3 +1,5 @@
+import {createPrivateStorage,profileEncryptionKey} from './private-storage.js';
+import {setupAccepted,setupVersion,setupRequired} from './setup.js';
 import {createEntryCoordinator} from './entry-coordinator.js';
 import {createTabBindings} from './tab-bindings.js';
 import {buildVersion} from './version.js';
@@ -9,6 +11,7 @@ import {createMarketFeed} from './market-feed.js';
 import { createEngine } from './engine.js';
 import { createManualPairs } from './manual-pair.js';
 import { validateManualTicket } from './manual-limits.js';
+const privateStorage=createPrivateStorage({storage:chrome.storage.local,crypto,getKey:profileEncryptionKey({indexedDB,crypto})});
 const entryOperations=createEntryCoordinator();
 const pressureFeed=createPressureFeed();let statusReading=null,statusSourceTab=null,pageReading=null,pageSourceTab=null,pageSamples=[];
 const tabSessions=createTabBindings({
@@ -41,8 +44,8 @@ async function pageMessage(order, type) {
 }
 const manualPairs=createManualPairs({
  queue:()=>{const reading=pressureView(pageReading,Date.now());if(reading.live)return reading;const direct=pressureFeed.peek();return direct.live?direct:pressureView(statusReading,Date.now());},
- load:async()=>{const stored=await chrome.storage.local.get('manualPairsV1');return Object.hasOwn(stored,'manualPairsV1')?stored.manualPairsV1:[];},
- save:async pairs=>chrome.storage.local.set({manualPairsV1:pairs}),
+ load:async()=>{const stored=await privateStorage.get('manualPairsV1');return Object.hasOwn(stored,'manualPairsV1')?stored.manualPairsV1:[];},
+ save:async pairs=>privateStorage.set({manualPairsV1:pairs}),
  snapshot:order=>pageMessage(order,'pairSnapshot'),
  identify:order=>pageMessage(order,'pairIdentity'),
  execute:order=>pageMessage(order,'execute'),
@@ -57,18 +60,18 @@ const manualPairs=createManualPairs({
 });
 const engine = createEngine({
   load: async () => {
-    const stored = await chrome.storage.local.get(['limitOrdersV3', 'orders']);
+    const stored = await privateStorage.get(['limitOrdersV3', 'orders']);
     // Retire old SL/pair workflows on upgrade rather than silently continuing them.
-    if (stored.orders?.length) await chrome.storage.local.set({ orders: stored.orders.map(o => ({ ...o, automatic: false, status: 'cancelled', upgradeNote: 'Replaced by limit-entry-only version.' })) });
+    if (stored.orders?.length) await privateStorage.set({ orders: stored.orders.map(o => ({ ...o, automatic: false, status: 'cancelled', upgradeNote: 'Replaced by limit-entry-only version.' })) });
     const orders=stored.limitOrdersV3;
     if(!Array.isArray(orders))return orders;
     await bindingsReady;
     const upgraded=orders.map(o=>Number.isInteger(o.targetTabId)&&['watching','awaiting_fill','exits_armed','close_submitted'].includes(o.status)&&!tabSessions.matches(o)?{...o,status:'attention',message:'Browser tab session changed. Re-arm this watch from the intended Papertrade tab.'}:o.status==='watching' && o.entryTolerance==null?{...o,status:'cancelled',message:'Recreate this entry with the new price tolerance. Existing TP / SL watches are retained.'}:o);
-    if(upgraded.some((o,i)=>o!==orders[i]))await chrome.storage.local.set({limitOrdersV3:upgraded});
+    if(upgraded.some((o,i)=>o!==orders[i]))await privateStorage.set({limitOrdersV3:upgraded});
     return upgraded;
   },
   save: async orders => {
-    await chrome.storage.local.set({ limitOrdersV3: orders });
+    await privateStorage.set({ limitOrdersV3: orders });
     void Promise.resolve(chrome.action.setBadgeText({ text: orders.some(o => ['attention', 'failed'].includes(o.status)) ? '!' : String(orders.filter(o => o.status === 'watching').length || '') })).catch(()=>{});
   },
   probe: order => pageMessage(order, 'probe'),
@@ -91,6 +94,16 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   const ownSite = sender.tab && sender.id === chrome.runtime.id && /^https:\/\/exchange\.papertrade\.xyz\//.test(sender.url ?? '');
   if (!ownPopup && !ownSite) { respond({ error: 'Origin refused.' }); return false; }
   const dispatch=async()=>{
+    if(message.type==='setupState'){const stored=await chrome.storage.local.get('setupAcknowledgementV1');return {accepted:setupAccepted(stored.setupAcknowledgementV1)};}
+    if(message.type==='setupAccept'){
+      if(message.version!==setupVersion)throw Error('Refresh the page to review the current notice.');
+      const acknowledgement={version:setupVersion,acceptedAt:Date.now()};
+      await chrome.storage.local.set({setupAcknowledgementV1:acknowledgement});return {ok:true,acknowledgement};
+    }
+    if(['create','pairOpen'].includes(message.type)){
+      const stored=await chrome.storage.local.get('setupAcknowledgementV1');
+      if(!setupAccepted(stored.setupAcknowledgementV1))throw Error(setupRequired);
+    }
     if(message.type==='pagePressure'){
       if(!ownSite)throw Error('Public queue relays require the native Papertrade page.');
       if(!message.publication){if(pageSourceTab===sender.tab.id){pageReading=null;pageSamples=[];}return {ok:true};}

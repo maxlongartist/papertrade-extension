@@ -1,0 +1,14 @@
+export const setupVersion=1;
+export const setupRequired='Review the first-run privacy and execution notice before opening or arming a new trade.';
+export const setupAccepted=value=>value?.version===setupVersion&&Number.isFinite(value.acceptedAt)&&value.acceptedAt>0;
+export function mountSetup(root,send,onAccepted){
+ root.innerHTML=`<style>:host{display:block}section{font:12px/1.5 system-ui;color:#e5eee9;background:#17232a;border:1px solid #496359;border-radius:8px;margin:12px 0;padding:14px}h2{font-size:15px;margin:0 0 9px}p{margin:8px 0}a{color:#b0d5eb}label{display:block;margin:12px 0}button{font:600 12px system-ui;padding:10px;border:1px solid #668774;border-radius:5px;background:#d6e6ef;color:#14242e;cursor:pointer}button:disabled{opacity:.45}#setupError{color:#ffc38c;min-height:3em;overflow-wrap:anywhere}</style><section aria-label="First-run setup"><h2>Before you trade · beta</h2><p>This is an independent extension for Papertrade. It is not an official Papertrade product.</p><p>It reads your Papertrade wallet address, available balance, position details and trade settings. It saves order watches and pair history in this Chrome profile. It does not read your private key or send your trading history to the developer.</p><p>Public prices and queue data connect to Hyperliquid and Papertrade. Those services receive normal connection information such as your IP address.</p><p><b>Keep Chrome, this tab and native Positions open, and your wallet authorized.</b> Triggers send market orders; final prices can differ. Long and short are separate requests, so a pair can lose money. Missing replies must be checked in Positions and Status before trying again.</p><p><a href="https://github.com/maxlongartist/papertrade-extension/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy policy</a> · <a href="https://github.com/maxlongartist/papertrade-extension/issues/new/choose" target="_blank" rel="noopener">Report a problem</a></p><label><input id="setupConsent" type="checkbox"> I agree to this use of my data and understand how the trading controls work.</label><button id="setupContinue" disabled>Agree and show controls</button><div id="setupError" role="status"></div></section>`;
+ const $=id=>root.querySelector('#'+id);let disposed=false,busy=false;
+ $('setupConsent').onchange=()=>{$('setupContinue').disabled=busy||!$('setupConsent').checked;};
+ $('setupContinue').onclick=async()=>{if(disposed||busy||!$('setupConsent').checked)return;busy=true;$('setupContinue').disabled=true;
+  try{const result=await send({type:'setupAccept',version:setupVersion});if(disposed)return;if(result.error)throw Error(result.error);if(!setupAccepted(result.acknowledgement))throw Error('Setup could not be saved. Please try again.');onAccepted();}
+  catch(error){if(!disposed)$('setupError').textContent=error.message;}
+  finally{busy=false;if(!disposed)$('setupContinue').disabled=!$('setupConsent').checked;}
+ };
+ return ()=>{disposed=true;};
+}

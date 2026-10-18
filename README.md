@@ -1,5 +1,7 @@
 # Papertrade · Manual Pair & Limits
 
+**Independent beta.** Read the first-run notice before using the trading controls.
+
 Adds **Open long + short**, **Close pair**, **limit entries**, and **stop loss / take profit** to Papertrade.
 
 ## Install it — no coding needed
@@ -63,3 +65,6 @@ Download and unzip the new version. Copy its files into the **same folder you al
 ---
 
 Want to build from source? See [developer notes](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/DEVELOPMENT.md).
+
+
+[Privacy policy](https://github.com/maxlongartist/papertrade-extension/blob/main/PRIVACY.md) · [Report a problem](https://github.com/maxlongartist/papertrade-extension/issues/new/choose)

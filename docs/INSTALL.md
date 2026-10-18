@@ -13,6 +13,8 @@
 9. Select the extracted folder. **That folder must directly contain `manifest.json`.** If you see another folder inside it, open that inner folder and check there.
 10. Open **[Papertrade](https://exchange.papertrade.xyz/trade/btc)** and refresh the page. Connect your wallet on Papertrade as usual.
 
+On your first trading-page visit, read the notice, tick the agreement box, then click **Agree and show controls**.
+
 **You're ready.** Look below Papertrade's normal trading controls for Network queue, Manual pair, and Limit entry. The extension does not need your private key.
 
 **Next: [See how to use it, with screenshots](../README.md#open-and-close-a-long--short-pair).**
@@ -60,3 +62,8 @@ Check Papertrade's own **Positions** and **Status** tabs before trying again. A 
 ## Building it yourself?
 
 You can skip this if you downloaded the ready-to-install ZIP. Source-build commands are in the [developer notes](DEVELOPMENT.md).
+
+
+## Moving from an unpacked copy to the Chrome Web Store
+
+A Store installation is a separate copy. Your old saved orders and pair tracking will not transfer automatically. Reconcile live positions and pending actions using the original copy and Papertrade first, then disable the original copy before installing the Store copy. Explicitly set up the protection you need in the new copy. Do not run both copies together.
