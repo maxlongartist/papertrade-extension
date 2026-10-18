@@ -5,7 +5,7 @@ export function monitorView({connected,visible,positionsReady,accountReady,tick}
  if(!positionsReady)return {label:'Positions check needed',warning:true,detail:'Open Papertrade’s Positions tab and leave it visible.'};
  const fresh=tick&&[tick.sourceAt,tick.receivedAt].every(t=>Number.isFinite(t)&&t<=now+1000&&now-t<1500);
  if(!fresh)return {label:'Price data unavailable or delayed',warning:true,detail:'New entries and price-triggered exits may wait for fresh data. Check native Positions.'};
- return {label:'Data and Positions checks available',warning:false,detail:'Execution still depends on wallet authorization and native controls. Keep this tab open.'};
+ return {label:'Price and Positions checks available',warning:false,detail:'Execution still depends on wallet authorization and native controls. Keep this tab open.'};
 }
 export function mountMonitor(root,send,checkPage){
  root.innerHTML='<style>:host{display:block}section{font:11px/1.5 system-ui;border:1px solid #496359;border-radius:6px;background:#17232a;color:#bfd9c8;margin:12px 0;padding:10px}b{display:block;height:3em;overflow:auto}section[data-warning=true]{color:#ffd081;border-color:#80693c}p{height:4.5em;overflow:auto;margin:4px 0 0}a{color:#b0d5eb}</style><section data-warning="true"><b id="monitorLabel">Checking monitoring conditions…</b><p id="monitorDetail" role="status">No execution guarantee. Keep native Positions visible.</p><a href="https://github.com/maxlongartist/papertrade-extension/issues/new/choose" target="_blank" rel="noopener">Report a problem</a> · <a href="https://github.com/maxlongartist/papertrade-extension/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy</a></section>';

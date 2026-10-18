@@ -35,12 +35,12 @@ function syncRoute() {
   }else if(conflictNotice)conflictNotice.hidden=true;
   if (!host || !host.isConnected || route !== market) {
     disposeMonitor?.();monitorHost?.remove();disposeQueue?.();queueHost?.remove();dispose?.();disposePositions?.();disposePair?.();pairHost?.remove(); host?.remove(); host = document.createElement('div'); host.id = 'paperpilot-extension';
-    monitorHost=document.createElement('div');monitorHost.id='paperpilot-monitor';panel.append(monitorHost);
+    monitorHost=document.createElement('div');monitorHost.id='paperpilot-monitor';
     disposeMonitor=mountMonitor(monitorHost.attachShadow({mode:'closed'}),uiSend,()=>{let positionsReady=false,accountReady=false;try{assertFullPositions(document,{allowPending:true});positionsReady=true;}catch{}try{readAccount(document,market);accountReady=true;}catch{}return {market,positionsReady,accountReady,visible:document.visibilityState==='visible'};});
     queueHost=document.createElement('div');queueHost.id='paperpilot-network-queue';panel.append(queueHost);disposeQueue=mountCongestion(queueHost.attachShadow({mode:'closed'}),uiSend,{market});
     pairHost=document.createElement('div');pairHost.id='paperpilot-manual-pair';panel.append(pairHost);
     disposePair=mountManualPanel(pairHost.attachShadow({mode:'closed'}),uiSend,{market,getTicket:()=>readTicket(document)});
-    panel.append(host); route = market;
+    panel.append(host,monitorHost); route = market;
     if(['BTC','ETH'].includes(market)) {
       dispose = mountPanel(host.attachShadow({ mode: 'closed' }), uiSend, { market, getTicket: () => readTicket(document) });
       disposePositions=mountPositionControls(document,uiSend,()=>dispose,{market});

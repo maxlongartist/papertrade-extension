@@ -4,7 +4,11 @@ Effective date: October 18, 2026
 
 This independent extension adds manual pair controls and conditional trading tools to Papertrade. It is not an official Papertrade or Hyperliquid product. The developer is the GitHub account [maxlongartist](https://github.com/maxlongartist). Questions and privacy requests can be made through [the project's support page](https://github.com/maxlongartist/papertrade-extension/issues). Do not post private keys, seed phrases, account screenshots, or sensitive trading details in a public issue.
 
-## Information the extension handles
+## No developer data collection
+
+We do not collect usage analytics or automatically receive your wallet details, balances, positions, order watches or trading history. There is no developer-operated data collection server. Trading records stay locally in your Chrome profile unless you choose to export and share them.
+
+## Information used locally by the extension
 
 On Papertrade trading pages, the extension reads the public wallet address shown by Papertrade; available balance; native trade settings; rendered positions, their IDs, margin, leverage, entry/mark prices and displayed status; and public price/queue information. It uses these values to bind actions to the intended wallet, market, position and tab, show estimates, and request the actions you configure.
 
