@@ -117,3 +117,12 @@ export function assertFullPositions(document, {allowPending=false}={}) {
   if(!allowPending && rows.some(row=>/pending trade$/.test(row.getAttribute('aria-label')??'')))throw Error('Wait for pending native entries to finish before arming another bracket.');
   if(rows.some(row=>Number(row.getAttribute('aria-setsize'))!==rows.length))throw Error('Some native positions are not rendered. TP / SL cannot safely bind this view.');
 }
+
+// Prepares native input fields only; never clicks a direction or submit control.
+export async function updateNativeTicket(document,{margin,leverage}){
+  if(!Number.isFinite(margin)||margin<=0||!Number.isSafeInteger(leverage)||leverage<1)throw Error('Enter a positive margin and whole-number leverage.');
+  const controls=fields(document),setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;
+  for(const [input,value]of [[controls.margin,margin],[controls.leverage,leverage]])if(Number(input.value)!==value){setter.call(input,String(value));input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));}
+  await new Promise(resolve=>setTimeout(resolve,100));
+  const actual=readTicket(document);if(!actual.ok||actual.margin!==margin||actual.leverage!==leverage)throw Error('Papertrade did not retain that margin or leverage. Check the native ticket.');return actual;
+}

@@ -29,23 +29,25 @@ export function decodeBook(data,receivedAt=Date.now()) {
   return {...tick,feedSource:'l2Book'};
 }
 export function hit(order, tick, now = Date.now()) {
-  return fresh(tick, now) && tick.market === order.market && (order.side === 'long' ? triggerPrice(order,tick)<=order.price : triggerPrice(order,tick)>=order.price);
+  if(!fresh(tick,now)||tick.market!==order.market)return false;
+  if(order.entryMode==='market')return true;
+  const price=triggerPrice(order,tick);return order.entryMode==='trigger'?(order.side==='long'?price>=order.price:price<=order.price):(order.side==='long'?price<=order.price:price>=order.price);
 }
 // Tolerance caps adverse entry prices; legacy watches keep their symmetric window.
 export function entryPriceAllowed(order,price) {
   if(!Number.isFinite(price)||price<=0)return false;
-  if(order.entryTolerance==null)return true;
+  if(order.entryTolerance==null||order.entryMode==='market')return true;
   return order.entryMode==='limit'?(order.side==='long'?price<=order.price+order.entryTolerance:price>=order.price-order.entryTolerance):Math.abs(price-order.price)<=order.entryTolerance;
 }
 export function entryExitConflict(order,price) {
-  if(order.entryMode!=='limit')return null;
+  if(!['limit','trigger','market'].includes(order.entryMode))return null;
   const levels=exitLevels(order);
   if(levels.stopLoss!=null&&(order.side==='long'?price<=levels.stopLoss:price>=levels.stopLoss))return `Entry paused: price has crossed the effective stop loss $${levels.stopLoss}. Edit the entry/exits or cancel. Nothing submitted.`;
   if(levels.takeProfit!=null&&(order.side==='long'?price>=levels.takeProfit:price<=levels.takeProfit))return `Entry paused: price has crossed the effective take profit $${levels.takeProfit}. Edit the entry/exits or cancel. Nothing submitted.`;
   return null;
 }
 export function entryBlockReason(order,tick,now=Date.now()) {
-  if(!hit(order,tick,now))return 'Waiting for the limit price. Nothing submitted.';
+  if(!hit(order,tick,now))return order.entryMode==='trigger'?'Waiting for the trigger price. Nothing submitted.':order.entryMode==='market'?'Waiting for fresh market data. Nothing submitted.':'Waiting for the limit price. Nothing submitted.';
   if(tick.sourceAt>now+100||tick.receivedAt>now+100||now-tick.sourceAt>500||now-tick.receivedAt>500)return 'Waiting for a fresh quote (500 ms maximum). Nothing submitted.';
   const mark=positionMarkPrice(tick),conflict=entryExitConflict(order,mark);if(conflict)return conflict;
   if(!entryPriceAllowed(order,triggerPrice(order,tick))||!entryPriceAllowed(order,mark))return order.entryMode==='limit'?'Waiting: chart or mark exceeds the adverse entry allowance. Nothing submitted.':'Waiting for a fresh quote within the entry window. Nothing submitted.';
@@ -73,8 +75,8 @@ export function validateOrder(input, venue, now = Date.now()) {
   for (const value of [stopLoss, takeProfit]) if (value != null && (!Number.isFinite(value) || value <= 0)) throw Error('TP and SL must be positive prices.');
   if (stopLoss != null && (input.side === 'long' ? stopLoss >= input.price : stopLoss <= input.price)) throw Error('Stop loss must be below a long entry or above a short entry.');
   if (takeProfit != null && (input.side === 'long' ? takeProfit <= input.price : takeProfit >= input.price)) throw Error('Take profit must be above a long entry or below a short entry.');
-  const entryMode=input.entryMode??'limit';if(!['limit','near'].includes(entryMode))throw Error('Invalid entry mode.');
-  return { entryMode,exitPriceMode:input.exitPriceMode??'mark',targetTabId:input.targetTabId,targetTabKey:input.targetTabKey,priceMode:input.priceMode??'papertrade', exitLead, entryTolerance, stopLoss, takeProfit, id: crypto.randomUUID(), market: input.market, side: input.side, price: input.price, margin: input.margin, leverage: input.leverage, status: 'watching', createdAt: now, expiresAt: now + 86400000, message: 'Watching price. Executes automatically when reached.' };
+  const entryMode=input.entryMode??'limit';if(!['limit','near','trigger','market'].includes(entryMode))throw Error('Invalid entry mode.');
+  return { entryMode,exitPriceMode:input.exitPriceMode??'mark',targetTabId:input.targetTabId,targetTabKey:input.targetTabKey,priceMode:input.priceMode??'papertrade', exitLead, entryTolerance, stopLoss, takeProfit, id: crypto.randomUUID(), market: input.market, side: input.side, price: input.price, margin: input.margin, leverage: input.leverage, status: 'watching', createdAt: now, expiresAt: now + (entryMode==='market'?10000:86400000), message: 'Watching price. Executes automatically when reached.' };
 }
 export function validateExits(input, defaultLead=0) {
   const stopLoss=input.stopLoss??null,takeProfit=input.takeProfit??null,exitLead=input.exitLead??defaultLead;

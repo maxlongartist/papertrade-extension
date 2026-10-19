@@ -104,3 +104,9 @@ test('a blocked page instance cannot prepare or click the native entry ticket',a
 test('page instance is rechecked after native preparation and before its only click',async()=>{
  const f=fixture();let checks=0;await assert.rejects(run(f,{}, {assertEntry:()=>{if(++checks===2)throw Error('Duplicate appeared during preparation');}}),/Duplicate appeared/);assert.equal(checks,2);assert.equal(f.clicks(),0);
 });
+
+import {updateNativeTicket} from '../extension/native.js';
+test('compact sizing updates native fields without clicking trade or direction controls',async()=>{
+ const f=fixture(),prior=globalThis.HTMLInputElement;globalThis.HTMLInputElement=f.Input;
+ try{const result=await updateNativeTicket(f.document,{margin:40,leverage:300});assert.equal(result.margin,40);assert.equal(result.leverage,300);assert.equal(f.clicks(),0);assert.equal(f.side(),'long');await assert.rejects(updateNativeTicket(f.document,{margin:0,leverage:300}));await assert.rejects(updateNativeTicket(f.document,{margin:40,leverage:1.5}));const reverted=fixture({revert:true});await assert.rejects(updateNativeTicket(reverted.document,{margin:40,leverage:300}),/did not retain/);assert.equal(reverted.clicks(),0);}finally{globalThis.HTMLInputElement=prior;}
+});

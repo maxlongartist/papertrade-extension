@@ -54,7 +54,7 @@ export function mountNativeOverlay({getLevels,getActivity=()=>[],getDraft,setDra
     }
     if(draft)for(const [field,label,c]of [['price','Entry','#bedffc'],['stopLoss','SL','#ff9b9b'],['takeProfit','TP','#77dfa0']]){
       const price=draft[field],y=axis.slope*price+axis.intercept;if(!Number.isFinite(price)||price<=0||y<12||y>height-12)continue;
-      const editable=!(field==='price'&&draft.mode==='position'),g=node('g',editable?{'data-draft':field,tabindex:0,role:'slider','aria-label':label+' draft on main chart','aria-valuenow':price,'aria-valuemin':'.01','aria-valuemax':'10000000',style:'pointer-events:visiblePainted;cursor:ns-resize'}:{});
+      const editable=!(field==='price'&&(draft.mode==='position'||draft.priceEditable===false)),g=node('g',editable?{'data-draft':field,tabindex:0,role:'slider','aria-label':label+' draft on main chart','aria-valuenow':price,'aria-valuemin':'.01','aria-valuemax':'10000000',style:'pointer-events:visiblePainted;cursor:ns-resize'}:{});
       const x=Math.max(6,right-194);svg.prepend(node('line',{'data-draft-line':field,x1:0,x2:right,y1:y,y2:y,stroke:c,'stroke-width':2}));g.append(node('rect',{x,y:y-10,width:188,height:20,rx:3,fill:'#162c3a'}),node('text',{x:x+5,y:y+4,fill:c},`${label} $${price.toFixed(2)} · ${editable?'DRAFT':'position'}`),node('title',{},'Dragging changes the ticket draft only. Save/arm in the ticket to apply.'));svg.append(g);
     }
     if(Number.isFinite(draft?.liquidationPrice)&&draft.liquidationPrice>0){

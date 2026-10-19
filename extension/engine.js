@@ -10,6 +10,7 @@ export function createEngine({ load, save, probe, execute, positions, close, now
     orders = Array.isArray(stored) ? stored : [];
     let changed = false;
     orders = orders.map(order => {
+      if(order.status==='watching'&&order.entryMode==='market'){changed=true;return {...order,status:'cancelled',message:'Unsubmitted market request discarded after restart. Submit explicitly again.'};}
       if (['watching','awaiting_fill','submitted','exits_armed','close_submitted'].includes(order.status) && !validOwner(order.owner)) {
         changed=true;return {...order,status:'attention',message:'Saved watch has no verified wallet binding. Re-arm it from your intended wallet. No automatic action.'};
       }
@@ -73,7 +74,7 @@ export function createEngine({ load, save, probe, execute, positions, close, now
         }catch(error){orders[index]={...order,absentCount:0,closeObservation:'Unavailable',message:'Close confirmation unavailable: '+error.message};await persist();}continue;
       }
       if (order.status === 'awaiting_fill' || (order.status==='submitted'&&order.bindingSnapshotComplete===true&&typeof positions==='function')) {
-        if (now() >= order.expiresAt) {
+        if (now() >= (order.entryMode==='market'?(order.submittedAt??order.createdAt)+86400000:order.expiresAt)) {
           orders[index] = {...order,status:'attention',message:'Fill monitoring expired. Attach exits to the intended native position explicitly.'};await persist();continue;
         }
         try {
@@ -180,7 +181,7 @@ export function createEngine({ load, save, probe, execute, positions, close, now
       const order = orders[index];
       if (order.status !== 'watching') continue;
       if (now() >= order.expiresAt) {
-        orders[index] = { ...order, status: 'expired', message: '24-hour watch expired. Nothing submitted.' };
+        orders[index] = { ...order, status: 'expired', message: order.entryMode==='market'?'Market request expired after 10 seconds. Nothing submitted.':'24-hour watch expired. Nothing submitted.' };
         await persist(); continue;
       }
       if(findEntryFillConflict(order,orders)){const message=entryFillConflictMessage(order);if(order.message!==message){orders[index]={...order,message};await persist();}continue;}
@@ -231,7 +232,9 @@ export function createEngine({ load, save, probe, execute, positions, close, now
         if (message.type === 'check') return prepared.ready;
         if (message.type === 'create') {
           if (orders.filter(o => ['watching', 'submitting'].includes(o.status)).length >= 10) throw Error('Maximum 10 active watches.');
-          const order = validateOrder(message.order, venue, now());
+          if(message.order.entryMode==='market'&&!fresh(ticks[message.order.market],now()))throw Error('Waiting for a fresh market quote.');
+          const input=message.order.entryMode==='market'?{...message.order,price:papertradePrice(ticks[message.order.market])}:message.order;
+          const order = validateOrder(input, venue, now());
           if (!fresh(ticks[order.market], now())) throw Error('Waiting for a fresh market quote.');
           const ready = prepared.ready;
           if (!ready?.ok) throw Error(ready?.error ?? 'Connect and authorize your wallet first.');

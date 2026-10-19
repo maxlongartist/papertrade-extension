@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.87).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.88).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -38,16 +38,20 @@ Stuck? See the short [installation help](https://github.com/maxlongartist/papert
 
 The **Network queue** box estimates how busy Papertrade is. It does not tell you exactly when your trade will finish. A pair opens only when you click; it does not automatically repeat.
 
-## Set a limit entry, stop loss, or take profit
+## Use the tape and trading ticket
 
-1. In **Limit entry**, choose **Long** or **Short**.
-2. Type your entry price into **Limit price · USD**. With the default **Limit price or better**, Long waits for that price or lower; Short waits for that price or higher.
-3. **Entry tolerance · USD** is the allowed worse price just before the extension clicks. The final trade price can still differ.
-4. **Stop loss** asks to exit when the price moves against you; **take profit** asks to exit when it moves in your favor. Want either one? Open **TP / SL · optional** and enter your **Stop loss price** and/or **Take profit price**. These fields take the coin's price, not your desired profit or loss amount.
-5. **Trigger exits early · USD** tells the extension to request the exit that many dollars before your SL/TP price. It cannot guarantee the final exit price.
-6. Check the margin and leverage shown above the button. Click **Set long trigger** or **Set short trigger**.
+The **Trade tape** sits directly above the compact **Trade** ticket. Both stay visible in the same sidebar space; the tape has its own scroll area.
 
-**Liquidation price:** a gold **LIQ · EST** line shows the estimated liquidation price for your draft entry and leverage. It updates as you change or drag the entry. After opening an existing position in the SL/TP editor, the gold line uses its native bust price; reload positions to refresh it. Draft estimates change with the actual fill and require fresh venue data.
+1. Set **Margin · USDC** and **Leverage · ×** in the ticket. These prepare Papertrade’s native inputs without placing a trade. The notional estimate shows margin × leverage.
+2. Choose an order type:
+   - **Limit:** Long waits for your price or lower; Short waits for your price or higher.
+   - **Market:** click to request an entry now using a fresh quote. Requests that cannot submit expire after 10 seconds and are discarded after a worker restart. A submitted trade may still be queued by Papertrade.
+   - **Trigger:** Long waits for your price or higher; Short waits for your price or lower. Trigger entries must also pass the configured pre-click tolerance.
+3. Enter the limit/trigger price. **Mid** copies the current mark. Market shows a live reference price instead.
+4. Open **TP / SL · optional** to add absolute exit prices. **Trigger exits early · USD** requests exits that many dollars early; it does not guarantee the final fill.
+5. Check the **Long / Short liquidation estimates** and sizing, then click **Buy / Long** or **Sell / Short** once.
+
+**Execution settings** contains the price tolerance and legacy near-target option. These are pre-click checks; final fills still depend on Papertrade’s queue. Cross margin, reduce-only and GTC controls are not displayed because this ticket does not implement them.
 
 Your saved entry appears under **Active orders**. Click **Cancel order** there to cancel an entry that is still waiting. Once a trade has been sent, cancelling a watch cannot undo it.
 
@@ -61,7 +65,7 @@ Your saved entry appears under **Active orders**. Click **Cancel order** there t
 
 ## See who is trading
 
-Click **Trade tape** next to **Limit orders** to see Papertrade’s public opens, closes and liquidations as they arrive. Both tools share the same space, so you do not need to scroll past the wallet panels. It works without connecting a wallet.
+The **Trade tape** above the trading ticket shows Papertrade’s public opens, closes and liquidations as they arrive. It has a fixed-height scroll area, so the trading ticket stays directly beneath it. It works without connecting a wallet.
 
 - Choose the current coin or **All markets**, then filter by trade type and minimum notional size.
 - Each row shows side, action, size, price, leverage, reported trade PnL and wallet. Wallet names load when available; click a wallet for its full address and position ID. Narrow sidebars put price, leverage and PnL on a second line.

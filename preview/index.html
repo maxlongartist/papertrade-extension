@@ -10,7 +10,8 @@ import {createManualPairs} from '/extension/manual-pair.js';
 import {mountManualPanel} from '/extension/manual-panel.js';
 import {manualSnapshot} from '/extension/manual-native.js';
 import {mountPositionControls} from '/extension/experience.js';
-import {mountPanel} from '/extension/panel.js';import {createEngine} from '/extension/engine.js';import {readTicket,probeNative,executeNative,readPositions,closeNative,assertFullPositions} from '/extension/native.js';
+import {mountTradeTape} from '/extension/trade-tape-panel.js';
+import {mountPanel} from '/extension/panel.js';import {createEngine} from '/extension/engine.js';import {readTicket,updateNativeTicket,probeNative,executeNative,readPositions,closeNative,assertFullPositions} from '/extension/native.js';
 if(new URL(location.href).searchParams.get('scenario')==='overview') {
  document.body.innerHTML='<main><h1>Extension toolbar · simulated overview</h1><p class="note">INTEGRATION TEST · saved records and navigation are simulated. Queue readings are live public data. No wallet or funds.</p><div class="controls"><button id="overviewOutage">Simulate worker outage</button><button id="overviewResume">Restore connection</button></div><p id="navigationProof" class="note">0 simulated page navigations · 0 trades</p><div id="overviewPreview"></div></main>';
  let unavailable=false,navigations=0;
@@ -99,7 +100,8 @@ async function panelSend(message){
  return result;
 }
 if(new URL(location.href).searchParams.has('editConflict'))globalThis.fixtureConcurrentEdit=async changes=>{const state=await engine.request({type:'state'}),order=state.orders.find(o=>o.id===changes.id);return engine.request({type:'editWatch',...changes,expectedRevision:order.editRevision??0});};
-const panelController=mountPanel(document.querySelector('#panel').attachShadow({mode:'open'}),panelSend,{market:'BTC',getTicket:()=>readTicket(document)});
+const panelController=mountPanel(document.querySelector('#panel').attachShadow({mode:'open'}),panelSend,{market:'BTC',getTicket:()=>readTicket(document),setTicket:terms=>updateNativeTicket(document,terms),compact:new URL(location.href).searchParams.has('compact'),getBalance:()=>'$132'});
+if(new URL(location.href).searchParams.has('compact')){const tape=document.createElement('div');tape.id='compactTape';document.querySelector('#panel').before(tape);mountTradeTape(tape.attachShadow({mode:'open'}),{market:'BTC',compact:true,storage:{get:async()=>({}),set:async()=>{}},makeFeed:cb=>{cb({status:'live',connected:true});return ()=>{};}});globalThis.compactState=()=>engine.request({type:'state'});globalThis.compactQuote=value=>{if(Number.isFinite(value)){price=value;document.querySelector('#fixturePrice').textContent='$'+value;}quote();};}
 mountPositionControls(document,async message=>{try{return await engine.request(message);}catch(error){return {error:error.message};}},()=>panelController,{market:'BTC'});
 }
 </script></body></html>
