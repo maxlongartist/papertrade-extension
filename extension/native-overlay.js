@@ -57,6 +57,12 @@ export function mountNativeOverlay({getLevels,getActivity=()=>[],getDraft,setDra
       const editable=!(field==='price'&&draft.mode==='position'),g=node('g',editable?{'data-draft':field,tabindex:0,role:'slider','aria-label':label+' draft on main chart','aria-valuenow':price,'aria-valuemin':'.01','aria-valuemax':'10000000',style:'pointer-events:visiblePainted;cursor:ns-resize'}:{});
       const x=Math.max(6,right-194);svg.prepend(node('line',{'data-draft-line':field,x1:0,x2:right,y1:y,y2:y,stroke:c,'stroke-width':2}));g.append(node('rect',{x,y:y-10,width:188,height:20,rx:3,fill:'#162c3a'}),node('text',{x:x+5,y:y+4,fill:c},`${label} $${price.toFixed(2)} · ${editable?'DRAFT':'position'}`),node('title',{},'Dragging changes the ticket draft only. Save/arm in the ticket to apply.'));svg.append(g);
     }
+    if(Number.isFinite(draft?.liquidationPrice)&&draft.liquidationPrice>0){
+      const price=draft.liquidationPrice,y=axis.slope*price+axis.intercept;
+      if(y>=12&&y<=height-12){const x=Math.max(6,right-392),g=node('g',{'data-liquidation':'',style:'pointer-events:none'});
+        g.append(node('line',{x1:0,x2:right,y1:y,y2:y,stroke:'#f2c675','stroke-width':2,'stroke-dasharray':'4 4'}),node('rect',{x,y:y-10,width:190,height:20,rx:3,fill:'#162c3a'}),node('text',{x:x+5,y:y+4,fill:'#f2c675'},`LIQ $${price.toFixed(2)} · ${draft.liquidationEstimated?'EST':'position'}`),node('title',{},draft.liquidationEstimated?'Estimated liquidation from target entry and current venue buffer. Actual fill changes this.':'Native reported liquidation for selected position. Reload positions to refresh.'));svg.append(g);
+      }
+    }
     if(focusKey){const target=[...root.querySelectorAll('[data-wallet-action-key]')].find(e=>e.getAttribute('data-wallet-action-key')===focusKey);target?.focus({preventScroll:true});}
   }
   document.documentElement.setAttribute('data-paperpilot-chart-enabled','true');

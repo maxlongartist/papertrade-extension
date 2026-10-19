@@ -80,7 +80,9 @@ export function readPositions(document) {
     const margin = Number(cells[8]?.textContent?.replace(/[$,\s]/g, ''));
     const entryPrice = Number(cells[2]?.textContent?.replace(/[$,\s]/g, ''));
     const markPrice=Number(cells[3]?.textContent?.replace(/[$,\s]/g,''));
-    return [{markPrice,market:label[1],side:label[2],positionId:label[3],margin,leverage,entryPrice}];
+    const bustText=row.querySelector('.pt-bust-price')?.textContent;
+    const liquidationPrice=typeof bustText==='string'?Number(bustText.replace(/[$,\s]/g,'')):NaN;
+    return [{markPrice,market:label[1],side:label[2],positionId:label[3],margin,leverage,entryPrice,...(Number.isFinite(liquidationPrice)&&liquidationPrice>0?{liquidationPrice}:{})}];
   });
 }
 export async function closeNative(document, order) {
