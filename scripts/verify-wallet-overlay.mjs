@@ -1,0 +1,37 @@
+// Isolated browser + simulated public stream only. Never sends trading requests.
+import {mkdir,writeFile} from 'node:fs/promises';import {resolve} from 'node:path';import assert from 'node:assert/strict';import {pathToFileURL} from 'node:url';
+if(!process.env.PLAYWRIGHT_MODULE)throw Error('Set PLAYWRIGHT_MODULE.');
+const {chromium}=await import(pathToFileURL(resolve(process.env.PLAYWRIGHT_MODULE)).href),out=resolve('wallet-overlay-verification');await mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+try{
+ const page=await browser.newPage({viewport:{width:1400,height:1100},deviceScaleFactor:2});await page.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4320'?route.continue():route.abort());await page.goto('http://127.0.0.1:4320/');
+ await page.addScriptTag({path:resolve('extension/chart-bridge.js')});
+ await page.evaluate(async()=>{
+  document.body.innerHTML='<div id="chart" style="position:relative;width:850px;height:680px;background:#101a26"><canvas id="cv" width="1700" height="1360" style="width:850px;height:680px"></canvas></div><div id="wallet-root" style="position:absolute;left:870px;top:0;width:400px"></div>';
+  const address='0x'+'1'.repeat(40);globalThis.fixtureRequests=[];globalThis.fixtureDraft={mode:'entry',side:'long',price:82000,stopLoss:81000,takeProfit:83000};globalThis.fixtureDraftWrites=[];
+  const original=fetch;globalThis.fetch=async(url,options)=>{
+   if(!String(url).startsWith('/state/'))return original(url,options);fixtureRequests.push({url,method:options?.method??'GET',credentials:options?.credentials});
+   if(url==='/state/trading')return Response.json({instruments:[[0,'BTC',0,'10']]});
+   if(url.startsWith('/state/leaderboard/accounts'))return Response.json({ok:true,accounts:[{address,leaderboardName:'<img src=x onerror=alert(1)>'}]});
+   return new Response(new ReadableStream({start(c){globalThis.fixtureStream=c;options.signal.addEventListener('abort',()=>{globalThis.fixtureAborted=true;c.error(new DOMException('Aborted','AbortError'));});c.enqueue(new TextEncoder().encode('event: wallet\ndata: '+JSON.stringify({address,walletRevision:1,openPositions:[['1',0,true,false,'820000','20000000000000000000',300,'810000',1000],['2',0,false,false,'820010','20000000000000000000',300,'830000',1000]]})+'\n\n'));}}),{headers:{'content-type':'text/event-stream'}});
+  };
+  const {mountWalletPanel}=await import('/extension/wallet-panel.js');const store={get:async()=>({}),set:async value=>{globalThis.fixtureSaved=value;}};
+  globalThis.fixtureDispose=mountWalletPanel(document.querySelector('#wallet-root').attachShadow({mode:'open'}),{market:'BTC',getDraft:()=>fixtureDraft,setDraft:(field,value,meta)=>{fixtureDraft[field]=value;fixtureDraftWrites.push({field,value,meta});},storage:store});
+  globalThis.fixturePaint=(shift=0)=>{const canvas=document.querySelector('#cv'),ctx=canvas.getContext('2d');ctx.setTransform(2,0,0,2,0,0);ctx.fillStyle='#101a26';ctx.fillRect(0,0,850,680);ctx.fillStyle='#a5b5cc';ctx.font='12px system-ui';ctx.textAlign='left';ctx.textBaseline='middle';for(let i=0;i<5;i++)ctx.fillText((80000+i*1000).toLocaleString('en-US',{minimumFractionDigits:1}),790,580-i*120+shift);};globalThis.fixturePaintTimer=setInterval(()=>fixturePaint(globalThis.fixtureShift??0),100);
+ });
+ const panel=page.locator('#wallet-root');await panel.locator('#enabled').check();await panel.getByText('Wallets & filters',{exact:true}).click();await panel.locator('#load').click();await panel.locator('#status').filter({hasText:'1/1 wallet feeds live'}).waitFor();assert.equal(await panel.locator('#list img').count(),0);assert.match(await panel.locator('#list').innerText(),/<img/);
+ await panel.locator('#chart').check();await panel.locator('#drafts').check();await panel.locator('#scale').filter({hasText:'Chart scale verified'}).waitFor();
+ const cdp=await page.context().newCDPSession(page);
+ async function overlayEval(expression){const tree=await cdp.send('DOM.getDocument',{depth:-1,pierce:true});function find(n){if(n.nodeName==='svg'&&n.attributes?.includes('Public wallet levels and order drafts'))return n;for(const c of [...(n.children??[]),...(n.shadowRoots??[])]){const found=find(c);if(found)return found;}}const svg=find(tree.root);assert.ok(svg,'overlay SVG exists');const {object}=await cdp.send('DOM.resolveNode',{nodeId:svg.nodeId});const result=await cdp.send('Runtime.callFunctionOn',{objectId:object.objectId,functionDeclaration:'function(){'+expression+'}',returnByValue:true});if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));return result.result.value;}
+ assert.equal(await overlayEval('return this.querySelectorAll("[data-wallet-level]").length'),1);
+ assert.equal(await overlayEval('return this.querySelectorAll("[data-draft]").length'),3);
+ const before=await overlayEval('return +this.querySelector("[data-draft=stopLoss] line").getAttribute("y1")');assert.ok(Math.abs(before-460)<.1,'DPR axis alignment');
+ const rect=await overlayEval('const r=this.getBoundingClientRect();return {x:r.x,y:r.y}');await page.mouse.move(rect.x+650,rect.y+before);await page.mouse.down();await page.mouse.move(rect.x+650,rect.y+before-24,{steps:4});await page.mouse.up();assert.equal(await page.evaluate(()=>fixtureDraft.stopLoss),81200);assert.equal(await page.evaluate(()=>fixtureRequests.some(r=>r.method!=='GET')),false);
+ await page.evaluate(()=>{fixtureShift=30;});await page.waitForTimeout(400);const after=await overlayEval('return +this.querySelector("[data-draft=stopLoss] line").getAttribute("y1")');assert.ok(Math.abs(after-466)<.2,'scale follows chart pan');
+ await panel.locator('#liquidations').check();await page.waitForTimeout(300);assert.equal(await overlayEval('return this.querySelectorAll("[data-wallet-level]").length'),3);
+ await panel.locator('#minimum').fill('999999');await panel.locator('#minimum').dispatchEvent('change');await page.waitForTimeout(300);assert.equal(await overlayEval('return this.querySelectorAll("[data-wallet-level]").length'),0);
+ await panel.locator('#minimum').fill('0');await panel.locator('#minimum').dispatchEvent('change');await page.waitForTimeout(300);await page.screenshot({path:resolve(out,'wallet-levels-and-drafts.png')});
+ await page.evaluate(()=>{clearInterval(fixturePaintTimer);});await panel.locator('#scale').filter({hasText:'verified chart scale'}).waitFor({timeout:6000});assert.equal(await overlayEval('return this.children.length'),0,'stale geometry hides all lines');
+ await panel.locator('#enabled').uncheck();await page.waitForTimeout(200);assert.equal(await page.evaluate(()=>fixtureAborted),true);await panel.locator('#chart').uncheck();await panel.locator('#drafts').uncheck();assert.equal(await page.locator('#paperpilot-chart-overlay').count(),0);assert.equal(await page.evaluate(()=>document.documentElement.hasAttribute('data-paperpilot-chart-enabled')),false);
+ await page.evaluate(()=>fixtureDispose());await writeFile(resolve(out,'verification.json'),JSON.stringify({passed:true,simulated:true,deviceScaleFactor:2,draftDragChangesTicketOnly:true,panTracksScale:true,staleGeometryHidesLevels:true,disableAbortsStream:true,untrustedNamesRemainText:true,readOnlyRequests:true,fundedExecutionVerified:false},null,2));console.log('Wallet overlay fixture passed.');
+}finally{await browser.close();}

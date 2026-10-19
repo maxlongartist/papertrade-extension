@@ -12,7 +12,7 @@ run(['build.mjs']);
 const testFiles=(await readdir(join(project,'tests'))).filter(f=>f.endsWith('.test.js')).sort().map(f=>'tests/'+f);
 const testLog=run(['--test',...testFiles]);await writeFile(join(outputs,'papertrade-v'+version+'-tests.txt'),testLog);
 const testsPassed=Number(/^# pass (\d+)$/m.exec(testLog)?.[1]);assert.ok(testsPassed>0);assert.match(testLog,/^# fail 0$/m);
-const files=['content.js','manifest.json','popup.html','popup.js','worker.js','README.md','icons/icon-16.png','icons/icon-32.png','icons/icon-48.png','icons/icon-128.png'];
+const files=['chart-bridge.js','content.js','manifest.json','popup.html','popup.js','worker.js','README.md','icons/icon-16.png','icons/icon-32.png','icons/icon-48.png','icons/icon-128.png'];
 const staging=await mkdtemp(join(outputs,'.papertrade-release-'));const payload=join(staging,'payload');await mkdir(payload);await mkdir(downloads,{recursive:true});
 const latest=join(downloads,'papertrade-manual-pair-latest.zip'),latestStage=latest+'.tmp-'+process.pid;
 const exists=async p=>{try{await access(p);return true;}catch{return false;}};

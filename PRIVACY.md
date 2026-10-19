@@ -1,6 +1,6 @@
 # Privacy policy — Papertrade Manual Pair & Limits
 
-Effective date: October 18, 2026
+Effective date: October 19, 2026
 
 This independent extension adds manual pair controls and conditional trading tools to Papertrade. It is not an official Papertrade or Hyperliquid product. The developer is the GitHub account [maxlongartist](https://github.com/maxlongartist). Questions and privacy requests can be made through [the project's support page](https://github.com/maxlongartist/papertrade-extension/issues). Do not post private keys, seed phrases, account screenshots, or sensitive trading details in a public issue.
 
@@ -11,6 +11,10 @@ This independent extension adds manual pair controls and conditional trading too
 ## Information used locally by the extension
 
 On Papertrade trading pages, the extension reads the public wallet address shown by Papertrade; available balance; native trade settings; rendered positions, their IDs, margin, leverage, entry/mark prices and displayed status; and public price/queue information. It uses these values to bind actions to the intended wallet, market, position and tab, show estimates, and request the actions you configure.
+
+Optional public-wallet watching requests the public addresses you select from Papertrade’s public account leaderboard and position event streams. The extension keeps the selected public addresses, display names, filters and overlay preferences locally. Public position snapshots are held in page memory and discarded when watching stops; unrelated balances, session-key records and operations from public responses are not retained. Watching is off by default and requires its own opt-in.
+
+The optional main-chart overlay reads numeric axis labels drawn by Papertrade’s chart canvas. A bundled page-world observer captures chart geometry only while an overlay is enabled. The geometry channel is display-only and cannot request trades. Dragging your own levels edits local ticket drafts; Save or Arm is still required.
 
 It keeps local order watches, pair tracking/history, execution observations, and a first-run acknowledgement. Tab IDs and random session bindings identify the managing Papertrade tab; the extension does not keep a general browsing history. It does not read wallet private keys, seed phrases, or wallet passwords.
 
@@ -24,7 +28,7 @@ Records remain in that profile until changed or removed through normal use or re
 
 ## Network connections and sharing
 
-The extension connects to Papertrade (`exchange.papertrade.xyz`, `stream.papertrade.xyz`) and Hyperliquid (`api.hyperliquid.xyz`) for public market/venue/queue data. These services receive normal network connection information, including the connecting IP address and requested market subscriptions. Their own policies govern their services.
+The extension connects to Papertrade (`exchange.papertrade.xyz`, `stream.papertrade.xyz`) and Hyperliquid (`api.hyperliquid.xyz`) for public market/venue/queue data and, if enabled, public leaderboard and wallet-position data. Requested public wallet addresses are sent to Papertrade to obtain those positions. These services receive normal network connection information, including the connecting IP address and requested market subscriptions. Their own policies govern their services.
 
 When you configure a trading action, the extension operates Papertrade's native page controls. Papertrade and your wallet handle the resulting authorization and trading requests and receive the information needed for those requests. The extension does not provide a separate withdrawal or payment flow. The donation button only copies a public address.
 

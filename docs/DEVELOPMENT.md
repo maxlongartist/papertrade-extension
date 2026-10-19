@@ -49,3 +49,11 @@ git remote -v
 ```
 
 Changing a remote URL does not rewrite commit history. See [GitHub's remote-management guide](https://docs.github.com/en/get-started/git-basics/managing-remote-repositories).
+
+## Public wallet overlay
+
+`wallet-data.js` validates and projects public account SSE snapshots using `/state/trading` instrument scales; `wallet-feed.js` handles bounded streaming parsing, disconnects and Retry-After backoff. `wallet-panel.js` keeps opt-in selections locally and aborts streams on disable, hidden tabs, route changes or disposal. No trading messages are accepted from these feeds.
+
+`chart-bridge.js` is bundled local code running in MAIN world at document start. Its `fillText` observer preserves native drawing, is inactive until an overlay is enabled, and captures only numeric native chart axis coordinates. It uses no network or extension messaging. The isolated `native-overlay.js` validates the display-only geometry, requires a multi-label scale consensus, and hides stale/ambiguous scales. The shared DOM geometry cannot authorize trading. Draft drag events call the existing ticket draft setter; explicit Save / Arm remains required. No remotely downloaded code or extra host permission is used. A full Papertrade refresh is required after upgrading.
+
+`npm run verify:wallet-overlay` checks synthetic stream data, name escaping, high-DPI alignment, chart movement, draft dragging, filters and stale hiding on the localhost fixture. `npm run verify:public-wallets` checks a real unpacked extension against public signed-out Papertrade data and native chart zoom/pan in a temporary profile; its hidden-tab transition is simulated because headless Chrome keeps tabs visible. These are read-only checks and do not certify funded execution.

@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, and **stop loss /
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.69).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.71).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -54,6 +54,21 @@ Your saved entry appears under **Active orders**. Click **Cancel order** there t
 **Already have a position?** Click **Add/Edit SL/TP** on its row in Positions. Or expand **SL / TP for an existing position**, click **Load open positions**, choose yours, enter the exit prices, and click **Arm SL / TP on selected position**. This protects that position without opening another one. A price already past your exit level may cause an immediate Close request.
 
 *Screenshots show v0.7.63 with example settings. Click either picture to view it full-size.*
+
+## See public wallet positions on the chart
+
+1. Find **Public wallet levels** below the trading controls. Turn on **Watch public wallets**.
+2. Open **Wallets & filters** and click **Load top 10**, or add a public wallet address. The period menu changes the leaderboard used the next time you click Load top 10.
+3. Turn on **Show levels on main chart**. Green lines are long entries; red lines are short entries. Hover for wallet, position size and leverage. Nearby levels are grouped. You can also show liquidation levels or filter out small positions.
+4. Click a wallet name in the list to open its public Papertrade portfolio. Uncheck a wallet to hide it, or turn watching off to stop the feeds.
+
+These are public open positions from the selected wallets, not everyone’s orders. Their private SL/TP settings are unavailable. Rankings are snapshots of Papertrade’s windowed PnL and do not predict performance. Updates pause in hidden tabs; stale or disconnected feeds are hidden from the chart. The list still works when chart mapping is unavailable. No developer collects this data.
+
+**Want to move your own levels?** Turn on **Drag my ticket drafts on main chart**. Enter draft prices in Limit entry (or select your existing position’s exits), then drag Entry, SL or TP on the main chart. You can focus a handle and use ↑/↓ for $1 changes. Hold Shift while dragging for finer changes. **Dragging does not save or arm an order.** Use the ticket’s Save / Set trigger / Arm button when ready. Existing position entry prices cannot be moved.
+
+If levels are missing, pan or zoom the native chart. The extension hides lines when it cannot verify the current price scale. Refresh Papertrade after updating the extension so the chart observer loads.
+
+Pair controls show an execution progress path, separate native clicks from identified positions, and flag incomplete pairs or one remaining leg. Exposure and PnL remain estimates; position disappearance is not proof of settlement.
 
 ## Keep this in mind
 
