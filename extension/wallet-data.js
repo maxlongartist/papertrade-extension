@@ -62,3 +62,49 @@ export function groupLevels(levels,axis,gap=10){
   }
   return groups.sort((a,b)=>a.y-b.y);
 }
+
+// The public SSE protocol uses full snapshots followed by account-revision patches.
+// Retain only public position fields and IDs, never the rest of the account frame.
+export function createWalletReducer(address,instruments){
+  let current=null,ids=new Set();
+  return data=>{
+    if(!validAddress(data?.address)||data.address.toLowerCase()!==address.toLowerCase())throw Error('Public wallet identity mismatch.');
+    if(!Number.isSafeInteger(data.accountRevision)||data.accountRevision<=0)throw Error('Invalid account revision.');
+    if(!Object.hasOwn(data,'baseAccountRevision')){
+      const next=walletProjection(data,address,instruments);
+      if(current&&(next.revision<current.revision||data.accountRevision<current.accountRevision))throw Error('Out-of-order wallet snapshot.');
+      ids=new Set(data.openPositions.map(row=>row[0]));current={...next,accountRevision:data.accountRevision};return current;
+    }
+    if(!current||data.baseAccountRevision!==current.accountRevision||data.accountRevision<=current.accountRevision)throw Error('Public feed revision gap; reconnecting for a full snapshot.');
+    if(!data.state||typeof data.state!=='object'||Array.isArray(data.state)||!Array.isArray(data.addedPositions)||!Array.isArray(data.removedPositionIds)||data.addedPositions.length>5000||data.removedPositionIds.length>5000)throw Error('Invalid public position patch.');
+    const revision=Object.hasOwn(data.state,'walletRevision')?data.state.walletRevision:current.revision;
+    if(!Number.isSafeInteger(revision)||revision<current.revision)throw Error('Out-of-order wallet revision.');
+    const removed=new Set();for(const id of data.removedPositionIds){if(typeof id!=='string'||!/^\d{1,30}$/.test(id)||removed.has(id)||!ids.has(id))throw Error('Unknown or duplicate removed position.');removed.add(id);}
+    const additions=walletProjection({address:data.address,walletRevision:revision,openPositions:data.addedPositions},address,instruments).positions;
+    const nextIds=new Set([...ids].filter(id=>!removed.has(id)));
+    for(const row of data.addedPositions){if(ids.has(row[0]))throw Error('Duplicate added position.');nextIds.add(row[0]);}
+    if(nextIds.size>5000)throw Error('Too many public positions.');
+    const positions=[...current.positions.filter(p=>!removed.has(p.id)),...additions].sort((a,b)=>BigInt(a.id)>BigInt(b.id)?-1:1);
+    current={address:address.toLowerCase(),revision,accountRevision:data.accountRevision,positions};ids=nextIds;return current;
+  };
+}
+export const walletName=w=>w.alias?.trim()||w.name?.trim()||`${w.address.slice(0,6)}…${w.address.slice(-4)}`;
+export function positionChanges(previous,next,at=Date.now()){
+  if(!previous)return [];
+  const before=new Map(previous.positions.map(p=>[p.id,p])),after=new Map(next.positions.map(p=>[p.id,p])),events=[];
+  for(const p of next.positions){const old=before.get(p.id);if(!old)events.push({...p,action:'opened',at,address:next.address});else if(['entry','margin','leverage','liquidation','side','market'].some(key=>old[key]!==p[key]))events.push({...p,action:'changed',at,address:next.address});}
+  for(const p of previous.positions)if(!after.has(p.id))events.push({...p,action:'removed',at,address:next.address});
+  return events;
+}
+export function namedWalletGroups(levels,axis){
+  const wallets=new Map();for(const level of levels){const key=level.address??'';if(!wallets.has(key))wallets.set(key,[]);wallets.get(key).push(level);}
+  return [...wallets.values()].flatMap(rows=>groupLevels(rows,axis)).sort((a,b)=>a.y-b.y);
+}
+// Spread labels without changing the price line. A connector joins displaced labels.
+export function labelRows(groups,top,bottom,gap=22){
+  if(!groups.length)return [];const cap=Math.max(1,Math.floor((bottom-top)/gap)+1);
+  const rows=groups.slice(0,cap).map(g=>({...g,labelY:Math.max(top,Math.min(bottom,g.y))}));
+  for(let i=1;i<rows.length;i++)rows[i].labelY=Math.max(rows[i].labelY,rows[i-1].labelY+gap);
+  if(rows.at(-1).labelY>bottom){rows.at(-1).labelY=bottom;for(let i=rows.length-2;i>=0;i--)rows[i].labelY=Math.min(rows[i].labelY,rows[i+1].labelY-gap);}
+  return rows;
+}

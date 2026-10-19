@@ -1,10 +1,10 @@
-import {createSSEParser,walletProjection,retryDelay} from './wallet-data.js';
+import {createSSEParser,createWalletReducer,retryDelay} from './wallet-data.js';
 // One lifecycle per visible, opted-in page. Abort immediately on disable/route change.
 export function startWalletFeed(address,instruments,onUpdate,{fetcher=fetch,now=Date.now,setTimer=setTimeout,clearTimer=clearTimeout}={}){
   let disposed=false,attempt=0,timer,controller,revision=-1,watchdog;
   const update=value=>{if(!disposed)onUpdate(value);};
   async function connect(){
-    if(disposed)return;controller=new AbortController();let retryAfter=null,lastAt=now(),snapshot=null;
+    if(disposed)return;controller=new AbortController();let retryAfter=null,lastAt=now(),snapshot=null;const reduce=createWalletReducer(address,instruments);
     update({status:'connecting',address});
     watchdog=setInterval(()=>{if(now()-lastAt>30000)controller.abort();},5000);
     try{
@@ -15,7 +15,7 @@ export function startWalletFeed(address,instruments,onUpdate,{fetcher=fetch,now=
       const parse=createSSEParser(({event,data})=>{
         // Comments/heartbeat only renew transport freshness, never synthesize positions.
         if(event==='wallet'){
-          const next=walletProjection(JSON.parse(data),address,instruments);if(next.revision<revision)throw Error('Out-of-order wallet snapshot.');
+          const next=reduce(JSON.parse(data));if(next.revision<revision)throw Error('Out-of-order wallet snapshot.');
           revision=next.revision;snapshot=next;attempt=0;update({status:'live',...snapshot,receivedAt:now()});
         }
       });
