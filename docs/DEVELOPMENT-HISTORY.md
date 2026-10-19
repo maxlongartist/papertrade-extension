@@ -15,6 +15,14 @@ The connected wallet comes from Papertrade’s native wallet control and is chec
 
 The two opens are separate requests, not atomic. Equal margin and leverage can leave a small quantity mismatch when fill prices differ. Prices and fills are not guaranteed, and cash break-even is not guaranteed. A submitted entry/Close is never blindly repeated after a missing response. Unknown entries without an identified fill remain unresolved rather than pretending that an empty position list proves cancellation. Check native Status if a request stays uncertain. Chrome worker/page reloads retain tracking within the same browser tab session; a full browser restart can invalidate the original tab binding. The new Restore control can reconnect previously identified native position IDs after checking the same wallet and market. It never guesses an unbound entry or sends trades while restoring.
 
+## v0.7.80 — Inspect wallet positions directly from the chart
+
+- Chart labels and out-of-view wallet labels open trade context. Single-position labels and position-list buttons select the exact wallet/position; grouped labels prompt a choice.
+- Added keyboard button semantics, Enter/Space activation, pointer event isolation from native chart panning, and same-level focus restoration after overlay repaints.
+- Exact selections survive feed restarts. Missing positions and unwatched wallets do not silently fall back to another position or wallet. Reset extension connections and unwatched wallet destinations cannot activate context navigation.
+- Extended the overlay browser verifier for grouped/single/liquidation/offscreen selection, keyboard access, draft isolation, pointer isolation, reconnect continuity, and missing-target behavior.
+- Validation: 411 tests, production build, and isolated chart-overlay/trade-context/watchlist browser checks. No funded execution.
+
 ## v0.7.79 — Watched-wallet exposure overview
 
 - Added an at-a-glance current-asset overview: gross long/short quantities, net quantity, directional/near-balanced/flat wallet counts, and the largest wallet’s share of gross exposure.
