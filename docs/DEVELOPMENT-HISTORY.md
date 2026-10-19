@@ -15,6 +15,14 @@ The connected wallet comes from Papertrade’s native wallet control and is chec
 
 The two opens are separate requests, not atomic. Equal margin and leverage can leave a small quantity mismatch when fill prices differ. Prices and fills are not guaranteed, and cash break-even is not guaranteed. A submitted entry/Close is never blindly repeated after a missing response. Unknown entries without an identified fill remain unresolved rather than pretending that an empty position list proves cancellation. Check native Status if a request stays uncertain. Chrome worker/page reloads retain tracking within the same browser tab session; a full browser restart can invalidate the original tab binding. The new Restore control can reconnect previously identified native position IDs after checking the same wallet and market. It never guesses an unbound entry or sends trades while restoring.
 
+## v0.7.83 — Local wallet-list backup and import
+
+- Added explicit JSON download and local-file preview under Wallets & filters. The whitelist contains public addresses, names, aliases and per-wallet watch/alert choices only; signing/trading/journal records are excluded.
+- Strict versioned schema, 32 KB limit, maximum 10 unique addresses, duplicate/unknown-field rejection and generic parse errors prevent accidental import of unrelated or sensitive files.
+- Imports merge without replacing existing settings and refuse capacity overflow atomically. They persist through the preference write queue before updating the active list, with public preference controls locked during the write. Failed persistence keeps the current list active.
+- Preview cancellation and file-read generations prevent late local reads replacing a newer preview. Fresh-profile restore does not enable public watching or touch trading records.
+- Validation: 421 tests, production build and browser checks for preview, save gating/failure, opt-outs, capacity, stale reads, exports and migration. No funded execution.
+
 ## v0.7.82 — Explain feed health and unavailable controls
 
 - Added a compact per-wallet feed-health section with wallet names, live/stale/connecting/paused/not-watched states, retry countdowns and failure reasons. Stable row nodes preserve scrolling through normal updates.

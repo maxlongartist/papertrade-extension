@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.82).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.83).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -82,6 +82,16 @@ Click a wallet name in the position list to open **Trade context**. You can also
 - **Compare an entry:** see the current mark compared with the watched entry, the position’s age, and when this page first saw it. “Worse” means a higher long entry or a lower short entry. A stale price pauses the comparison.
 - **Wallet closed-trade sample:** load recent records, then optionally load older ones. Results subtract the venue’s user-paid fees and keep PAPER separate. Statistics describe the loaded sample; win rate stays unavailable below 20 loaded closed trades.
 - **Prepare my entry draft:** fills the entry direction/price using your own native margin and leverage, with empty exits. Review it in the ticket and use **Set trigger** to arm it. Preparing a draft submits nothing and will not overwrite an existing order/exit edit.
+
+## Move your wallet list to another installation
+
+1. Open **Wallets & filters → Back up / import wallet list** and click **Download wallet list**.
+2. In the other installation, open the same section and choose that JSON file.
+3. Review the wallet names, addresses and choices, then click **Add wallets from this backup**.
+
+The import adds wallets without replacing settings for addresses already saved. It restores names, custom labels, watch selections and per-wallet alert choices for new addresses. If the combined list would exceed 10 wallets, remove some saved wallets first; the import does not add a partial list. To restore a backup’s settings for an existing address, remove that address before importing.
+
+Importing does not change the main watching switch. If watching is already on, selected additions start public feeds; a fresh installation stays off until you enable watching. Backups contain public wallet addresses and your labels, so review before sharing. They contain no keys, orders or journal entries. Files are read locally and are never uploaded by this extension.
 
 ## When wallet feeds disconnect or get rate limited
 

@@ -1,6 +1,6 @@
 {
   "name": "papertrade-extension",
-  "version": "0.7.82",
+  "version": "0.7.83",
   "private": true,
   "type": "module",
   "scripts": {
@@ -40,7 +40,8 @@
     "verify:wallet-overlay": "node scripts/verify-wallet-overlay.mjs",
     "verify:public-wallets": "node scripts/verify-public-wallets.mjs",
     "verify:trade-context": "node scripts/verify-trade-context.mjs",
-    "verify:watchlist": "node scripts/verify-watchlist.mjs"
+    "verify:watchlist": "node scripts/verify-watchlist.mjs",
+    "verify:watchlist-backup": "node scripts/verify-watchlist-backup.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

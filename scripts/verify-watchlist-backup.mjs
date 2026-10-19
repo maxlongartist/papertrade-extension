@@ -1,0 +1,51 @@
+// Local-file and storage fixture only. No remote requests or trading authority.
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import assert from 'node:assert/strict';
+if(!process.env.PLAYWRIGHT_MODULE)throw Error('Set PLAYWRIGHT_MODULE.');
+const {chromium}=await import(pathToFileURL(resolve(process.env.PLAYWRIGHT_MODULE)).href),out=resolve('watchlist-backup-verification');await mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{})});
+const a='0x'+'a'.repeat(40),b='0x'+'b'.repeat(40),c='0x'+'c'.repeat(40),d='0x'+'d'.repeat(40);
+const backup=wallets=>({kind:'papertrade-wallet-watchlist',version:1,wallets});
+const wallet=(address,patch={})=>({address,name:'Public name',alias:'Local label',selected:true,alerts:false,...patch});
+try{
+ const page=await browser.newPage({viewport:{width:1200,height:1000}});await page.route('**/*',r=>new URL(r.request().url()).origin==='http://127.0.0.1:4320'?r.continue():r.abort());await page.goto('http://127.0.0.1:4320/');
+ await page.evaluate(async address=>{
+  document.body.innerHTML='<div id="watch" style="width:460px;margin:20px"></div>';
+  globalThis.backupFixture={requests:[],writes:[],messages:[],saved:{limitOrdersV3:[{id:'DO_NOT_TOUCH'}],publicWalletWatchV1:{enabled:true,chart:false,drafts:false,wallets:[{address,name:'Venue A',alias:'Saved label',nameChecked:true,selected:true,alerts:false}]}}};
+  const original=fetch;globalThis.fetch=async(url,options={})=>{
+   const path=new URL(url,location.origin);if(!path.pathname.startsWith('/state/'))return original(url,options);backupFixture.requests.push({url:String(url),method:options.method??'GET'});
+   if(path.pathname==='/state/trading')return Response.json({instruments:[[0,'BTC',0,'10']]});
+   if(path.pathname==='/state/user/live')return new Response(new ReadableStream({start(controller){options.signal.addEventListener('abort',()=>controller.error(new DOMException('Aborted','AbortError')));controller.enqueue(new TextEncoder().encode('event: wallet\ndata: '+JSON.stringify({address:path.searchParams.get('wallet'),walletRevision:1,accountRevision:1,openPositions:[]})+'\n\n'));}}),{headers:{'content-type':'text/event-stream'}});
+   throw Error('Unexpected request');
+  };
+  const {mountWalletPanel}=await import('/extension/wallet-panel.js'),root=document.querySelector('#watch').attachShadow({mode:'open'}),storage={get:async()=>structuredClone(backupFixture.saved),set:async value=>{
+   backupFixture.writes.push(Object.keys(value));if(backupFixture.failNext){backupFixture.failNext=false;throw Error('Fixture write failure');}
+   if(backupFixture.hold){backupFixture.writeStarted=true;await new Promise(r=>backupFixture.release=r);}
+   backupFixture.saved={...backupFixture.saved,...structuredClone(value)};
+  }};
+  backupFixture.mount=()=>{backupFixture.dispose=mountWalletPanel(root,{market:'BTC',storage,send:async m=>{backupFixture.messages.push(m.type);throw Error('No worker messages permitted by fixture');}});};backupFixture.mount();
+ },a);
+ const root=page.locator('#watch');await root.locator('#status').filter({hasText:'1/1 wallet feeds live'}).waitFor();await root.getByText('Wallets & filters',{exact:true}).click();await root.getByText('Back up / import wallet list',{exact:true}).click();
+ const choose=async(data,name='backup.json')=>{const picker=page.waitForEvent('filechooser');await root.locator('#watchChoose').click();await (await picker).setFiles({name,mimeType:'application/json',buffer:Buffer.from(typeof data==='string'?data:JSON.stringify(data))});};
+ const download=async()=>{const pending=page.waitForEvent('download');await root.locator('#watchExport').click();return JSON.parse(await readFile(await (await pending).path(),'utf8'));};
+ const initial=await download();assert.equal(initial.wallets.length,1);assert.deepEqual(Object.keys(initial.wallets[0]),['address','name','alias','selected','alerts']);assert.doesNotMatch(JSON.stringify(initial),/DO_NOT_TOUCH|limitOrders/);
+ const incoming=backup([wallet(a,{alias:'Do not overwrite',selected:false,alerts:true}),wallet(b,{alias:'<img src=x onerror=alert(1)>',selected:false,alerts:true})]);
+ await choose(incoming);await root.locator('#watchBackupStatus').filter({hasText:'1 new · 1 already saved'}).waitFor();assert.match(await root.locator('#watchPreview').innerText(),/<img/);assert.equal(await root.locator('#watchPreview img').count(),0);assert.equal(await page.evaluate(()=>backupFixture.saved.publicWalletWatchV1.wallets.length),1);
+ await page.evaluate(()=>backupFixture.hold=true);await root.locator('#watchApply').click();await page.waitForFunction(()=>backupFixture.writeStarted);assert.equal(await root.locator('#enabled').isDisabled(),true);assert.equal(await root.locator('#wallets .wallet-row').count(),1);assert.equal(await page.evaluate(()=>backupFixture.saved.publicWalletWatchV1.wallets.length),1);
+ await page.evaluate(()=>{backupFixture.hold=false;backupFixture.release();});await root.locator('#watchBackupStatus').filter({hasText:'1 wallet(s) saved'}).waitFor();assert.equal(await root.locator('#wallets .wallet-row').count(),2);const saved=await page.evaluate(()=>backupFixture.saved.publicWalletWatchV1.wallets);assert.equal(saved[0].alias,'Saved label');assert.equal(saved[0].selected,true);assert.equal(saved[0].alerts,false);assert.equal(saved[1].selected,false);assert.equal(saved[1].alerts,true);assert.equal(await page.evaluate(address=>backupFixture.requests.some(r=>r.url.includes('/state/user/live?wallet='+address)),b),false);
+ const exported=await download();assert.equal(exported.wallets.length,2);
+ const requestsBeforeFailure=await page.evaluate(()=>backupFixture.requests.length);await choose(backup([wallet(c)]));await root.locator('#watchBackupStatus').filter({hasText:'1 new · 0 already saved'}).waitFor();await page.evaluate(()=>backupFixture.failNext=true);await root.locator('#watchApply').click();await root.locator('#watchBackupStatus').filter({hasText:'could not be saved'}).waitFor();assert.equal(await root.locator('#wallets .wallet-row').count(),2);assert.deepEqual(await page.evaluate(()=>backupFixture.saved.publicWalletWatchV1.wallets),saved);assert.equal(await page.evaluate(()=>backupFixture.requests.length),requestsBeforeFailure);
+ await choose({privateKey:'SECRET_FROM_WRONG_FILE'});await root.locator('#watchBackupStatus').filter({hasText:'valid Papertrade wallet-watchlist backup'}).waitFor();assert.doesNotMatch(await root.locator('#watchBackup').innerText(),/SECRET_FROM_WRONG_FILE/);assert.equal(await root.locator('#watchApply').isDisabled(),true);
+ await choose(backup(Array.from({length:10},(_,i)=>wallet('0x'+String(i).padStart(40,'0')))));await root.locator('#watchBackupStatus').filter({hasText:'Not enough free slots'}).waitFor();assert.equal(await root.locator('#watchApply').isDisabled(),true);assert.deepEqual(await page.evaluate(()=>backupFixture.saved.publicWalletWatchV1.wallets),saved);
+ await root.locator('#watchDiscard').click();assert.equal(await root.locator('#watchPreview').innerText(),'');
+ // A slow first local read must not replace the preview chosen afterward.
+ await page.evaluate(()=>{const text=File.prototype.text;File.prototype.text=function(){if(this.name==='slow.json')return new Promise(resolve=>backupFixture.slowRead=()=>text.call(this).then(resolve));return text.call(this);};});
+ await choose(backup([wallet(c,{alias:'Slow old preview'})]),'slow.json');await page.waitForFunction(()=>typeof backupFixture.slowRead==='function');await choose(backup([wallet(d,{alias:'Latest preview'})]));await root.locator('#watchPreview').filter({hasText:'Latest preview'}).waitFor();await page.evaluate(()=>backupFixture.slowRead());await page.waitForTimeout(200);assert.doesNotMatch(await root.locator('#watchPreview').innerText(),/Slow old preview/);await root.locator('#watchDiscard').click();
+ // A fresh-profile import retains wallet choices but does not opt into public watching.
+ await page.evaluate(()=>{backupFixture.dispose();backupFixture.saved.publicWalletWatchV1={enabled:false,chart:false,drafts:false,wallets:[]};backupFixture.mount();});await root.locator('#status').filter({hasText:'Off'}).waitFor();await root.getByText('Wallets & filters',{exact:true}).click();await root.getByText('Back up / import wallet list',{exact:true}).click();assert.equal(await root.locator('#watchExport').isDisabled(),true);
+ const requestsBeforeRestore=await page.evaluate(()=>backupFixture.requests.length);await choose(exported);await root.locator('#watchBackupStatus').filter({hasText:'2 new'}).waitFor();await page.screenshot({path:resolve(out,'import-preview.png')});await root.locator('#watchApply').click();await root.locator('#watchBackupStatus').filter({hasText:'2 wallet(s) saved'}).waitFor();assert.equal(await root.locator('#enabled').isChecked(),false);assert.equal(await page.evaluate(()=>backupFixture.requests.length),requestsBeforeRestore);assert.equal(await root.locator('#wallets .wallet-row').count(),2);assert.equal(await root.locator('#wallets img').count(),0);assert.equal(await root.locator(`input[aria-label="Watch positions for ${b}"]`).isChecked(),false);
+ assert.deepEqual(await page.evaluate(()=>backupFixture.saved.limitOrdersV3),[{id:'DO_NOT_TOUCH'}]);assert.deepEqual(await page.evaluate(()=>backupFixture.messages),[]);assert.equal(await page.evaluate(()=>backupFixture.writes.every(keys=>keys.length===1&&keys[0]==='publicWalletWatchV1')),true);assert.equal(await page.evaluate(()=>backupFixture.requests.some(r=>r.method!=='GET')),false);
+ await page.evaluate(()=>backupFixture.dispose());await writeFile(resolve(out,'verification.json'),JSON.stringify({passed:true,simulated:true,previewBeforeSave:true,preservesExistingChoices:true,keepsImportedOptOuts:true,saveBeforeApplying:true,failedSaveKeepsActiveList:true,strictLocalSchema:true,capacityIsAtomic:true,lateFileReadDiscarded:true,restoreDoesNotEnableWatching:true,exportExcludesTradingRecords:true,noWorkerMessages:true,venueWrites:0,fundedExecutionVerified:false},null,2));console.log('Watchlist backup/import fixture passed.');
+}finally{await browser.close();}
