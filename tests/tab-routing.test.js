@@ -21,7 +21,11 @@ test('two market tabs: entry is bound to its originating tab and caller cannot o
 });
 test('existing-position stop uses the tab where protection was armed despite duplicate market tabs',async()=>{
  const h=await harness();await h.quote(83000);const result=await h.call({type:'protectPosition',market:'BTC',positionId:'42',stopLoss:83005,exitLead:2},22);assert.equal(result.order.targetTabId,22);
- await h.quote(83003);await new Promise(r=>setTimeout(r,0));assert.deepEqual(h.sends.filter(s=>s.type==='close').map(s=>s.id),[22]);
+ await h.quote(83003);
+ // Entry/exit persistence uses asynchronous Web Crypto. Wait for its observable
+ // dispatch rather than assuming it finishes within a zero-millisecond timer.
+ const deadline=Date.now()+1000;while(!h.sends.some(s=>s.type==='close')&&Date.now()<deadline)await new Promise(r=>setImmediate(r));
+ assert.deepEqual(h.sends.filter(s=>s.type==='close').map(s=>s.id),[22]);
 });
 test('closed or changed bound tab never falls back to another matching tab',async()=>{
  for(const mode of ['closed','changed']){
