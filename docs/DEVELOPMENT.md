@@ -73,3 +73,5 @@ The wallet decoder must handle both full `openPositions` snapshots and `baseAcco
 Wallet activity baselines reset on reconnect/retry/watch restart. Full snapshots are not observed trade events; only incremental changes against the current baseline produce moves. Alert receipt time is not a venue execution timestamp.
 
 Leaderboard discovery merges into a maximum-ten personal watchlist instead of replacing it. Existing selected/alerts/alias values are authoritative; incoming public names may refresh. When only metadata changes, existing subscriptions continue. Run `npm run verify:watchlist` with the same Playwright environment as the other isolated browser verifiers.
+
+`watchedExposure` derives current-asset base quantities from selected wallet projections and rejects unavailable/negative-age/30-second-stale feeds. A partial sample always exposes coverage. Chart minimum-size filters are intentionally excluded from this calculation to retain opposite legs. Direction counts reuse the per-wallet 10% gross imbalance threshold; concentration measures gross quantity, not directional conviction. The watchlist UI verifier also covers these invariants.

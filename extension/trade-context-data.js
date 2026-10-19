@@ -29,6 +29,24 @@ export function walletExposure(positions,market){
   const gross=long+short,net=long-short,paired=gross?2*Math.min(long,short)/gross:0;
   return {count:rows.length,long,short,net,paired,bias:!gross?'flat':Math.abs(net)/gross<.1?'paired':net>0?'net long':'net short',leverageMin:rows.length?Math.min(...rows.map(p=>p.leverage)):null,leverageMax:rows.length?Math.max(...rows.map(p=>p.leverage)):null};
 }
+// Exposure is a sample of opted-in wallets, never a market-wide signal.
+export function watchedExposure(wallets,states,market,{now=Date.now(),enabled=true}={}){
+  const unique=new Map(wallets.filter(w=>w.selected!==false).map(w=>[w.address,w]));
+  const result={status:enabled?'unavailable':'off',selected:unique.size,fresh:0,missing:unique.size,positions:0,long:0,short:0,net:0,longShare:null,largestShare:null,largestAddress:null,counts:{long:0,short:0,paired:0,flat:0}};
+  if(!enabled)return result;let largest=0;
+  for(const address of unique.keys()){
+    const state=states.get(address),age=now-state?.receivedAt;
+    if(state?.status!=='live'||!Number.isFinite(age)||age<0||age>=30000||!Array.isArray(state.positions))continue;
+    const rows=state.positions.filter(p=>p.market===market);
+    if(rows.some(p=>!['long','short'].includes(p.side)||!Number.isFinite(p.notional)||p.notional<0||!Number.isFinite(p.entry)||p.entry<=0||!Number.isFinite(p.notional/p.entry)))continue;
+    const exposure=walletExposure(rows,market),gross=exposure.long+exposure.short;
+    if(!Number.isFinite(gross)||!Number.isFinite(result.long+result.short+gross))continue;
+    result.fresh++;result.positions+=rows.length;result.long+=exposure.long;result.short+=exposure.short;if(gross>largest){largest=gross;result.largestAddress=address;}
+    result.counts[exposure.bias==='net long'?'long':exposure.bias==='net short'?'short':exposure.bias==='paired'?'paired':'flat']++;
+  }
+  result.missing=result.selected-result.fresh;result.net=result.long-result.short;const gross=result.long+result.short;
+  if(result.fresh)result.status='available';if(gross){result.longShare=result.long/gross;result.largestShare=largest/gross;}return result;
+}
 export function entryComparison(position,tick,now=Date.now()){
   const quote=chartQuoteView(tick,now);if(!position||quote.status!=='current')return {status:quote.status,price:null};
   const difference=(quote.price-position.entry)*(position.side==='long'?1:-1);

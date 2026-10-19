@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {closedTradePage,closedStats,tradeHistoryUrl,walletExposure,entryComparison,createAlertGate,walletAlertCandidates,walletAlertSummary} from '../extension/trade-context-data.js';import {tradeRow} from './helpers/closed-trades-fixture.js';
+import {closedTradePage,closedStats,tradeHistoryUrl,walletExposure,entryComparison,createAlertGate,walletAlertCandidates,walletAlertSummary,watchedExposure} from '../extension/trade-context-data.js';import {tradeRow} from './helpers/closed-trades-fixture.js';
 const address='0x'+'1'.repeat(40),pos=(patch={})=>({id:'1',market:'BTC',side:'long',entry:83000,notional:8300,margin:20,leverage:415,openedAt:100000,...patch});
 const tick={mid:83100,price:83100,bid:83099,ask:83101,sourceAt:200000,receivedAt:200000};
 test('venue history keeps exact fee subtraction, scale and PAPER separate',()=>{const data=closedTradePage({items:[tradeRow({adjustedPnlRaw:'1000000000000000001',userPaidFeeRaw:'1000000000000000000'})],nextCursor:null});assert.equal(data.items[0].netRaw,'1');assert.equal(data.items[0].entry,83000);assert.equal(data.items[0].exit,83100);assert.equal(data.items[0].paperRaw,'2000000000000000000');});
@@ -23,4 +23,16 @@ test('wallet alerts name the asset, direction and IDs, bound long batches, and d
  assert.equal(walletAlertSummary(events[2],previous,next),'BTC · gross exposure increased by $1,700');
  assert.equal(walletAlertSummary(events[3],previous,next),'BTC · net long → net short · $10,000 gross');
  const batch={address,positions:Array.from({length:6},(_,i)=>pos({id:String(i+2)}))};assert.match(walletAlertSummary(walletAlertCandidates({address,positions:[]},batch)[0],{address,positions:[]},batch),/long #2, long #3, long #4 \+3 more/);
+});
+
+test('watched exposure nets base quantities and displays wallet concentration without counting unselected or other assets',()=>{
+ const b='0x'+'2'.repeat(40),c='0x'+'3'.repeat(40),wallets=[{address},{address:b},{address:c,selected:false}],states=new Map([[address,{status:'live',receivedAt:1000,positions:[pos({notional:83000}),pos({id:'2',side:'short',notional:41500}),pos({market:'ETH',notional:999999})]}],[b,{status:'live',receivedAt:1000,positions:[pos({side:'short',notional:8300})]}],[c,{status:'live',receivedAt:1000,positions:[pos({notional:999999})]}]]);
+ const e=watchedExposure(wallets,states,'BTC',{now:1000});assert.equal(e.fresh,2);assert.equal(e.selected,2);assert.equal(e.positions,3);assert.equal(e.long,1);assert.equal(e.short,.6);assert.equal(e.net,.4);assert.equal(e.longShare,.625);assert.equal(e.largestShare,1.5/1.6);assert.equal(e.largestAddress,address);assert.deepEqual(e.counts,{long:1,short:1,paired:0,flat:0});
+});
+test('watched exposure explicitly distinguishes unavailable, partial, flat, paired and disabled samples',()=>{
+ const b='0x'+'2'.repeat(40),wallets=[{address},{address:b}],live={status:'live',receivedAt:1000,positions:[]};
+ for(const receivedAt of [0,1000,NaN,Infinity,32000]){const e=watchedExposure([{address}],new Map([[address,{...live,receivedAt}]]),'BTC',{now:31000});assert.equal(e.status,'unavailable');assert.equal(e.longShare,null);assert.equal(e.fresh,0);}
+ const states=new Map([[address,live],[b,{...live,status:'retrying'}]]),partial=watchedExposure(wallets,states,'BTC',{now:1000});assert.equal(partial.status,'available');assert.equal(partial.missing,1);assert.equal(partial.counts.flat,1);assert.equal(partial.longShare,null);
+ states.set(address,{...live,positions:[pos(),pos({id:'2',side:'short'})]});assert.equal(watchedExposure(wallets,states,'BTC',{now:1000}).counts.paired,1);assert.equal(watchedExposure(wallets,states,'BTC',{now:1000,enabled:false}).status,'off');assert.equal(watchedExposure(wallets,states,'BTC',{now:1000,enabled:false}).fresh,0);
+ states.set(address,{...live,positions:[pos({entry:0})]});assert.equal(watchedExposure(wallets,states,'BTC',{now:1000}).status,'unavailable');
 });

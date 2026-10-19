@@ -15,6 +15,14 @@ The connected wallet comes from Papertrade’s native wallet control and is chec
 
 The two opens are separate requests, not atomic. Equal margin and leverage can leave a small quantity mismatch when fill prices differ. Prices and fills are not guaranteed, and cash break-even is not guaranteed. A submitted entry/Close is never blindly repeated after a missing response. Unknown entries without an identified fill remain unresolved rather than pretending that an empty position list proves cancellation. Check native Status if a request stays uncertain. Chrome worker/page reloads retain tracking within the same browser tab session; a full browser restart can invalidate the original tab binding. The new Restore control can reconnect previously identified native position IDs after checking the same wallet and market. It never guesses an unbound entry or sends trades while restoring.
 
+## v0.7.79 — Watched-wallet exposure overview
+
+- Added an at-a-glance current-asset overview: gross long/short quantities, net quantity, directional/near-balanced/flat wallet counts, and the largest wallet’s share of gross exposure.
+- Fresh selected feeds only; missing, retrying, stale and future-dated observations do not contribute. Coverage and partial samples are explicit. No fresh feeds is unavailable, not flat.
+- The chart’s size filter does not affect quantity netting, so small opposite legs remain included. The overview is sample context rather than a market-wide signal.
+- Added numerical regressions plus browser checks for quantities, concentration, partial coverage, opt-outs, disabled watching and chart-filter independence.
+- Validation: 411 tests, production build and isolated watchlist/overlay/trade-context browser checks. No funded trades.
+
 ## v0.7.78 — Preserve the personal wallet watchlist
 
 - Changed leaderboard discovery to **Add top wallets**: adds ranked wallets into free slots and updates public names without replacing saved addresses, aliases, disabled watches or per-wallet alert preferences.

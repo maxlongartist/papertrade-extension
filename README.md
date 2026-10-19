@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.78).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.79).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -82,6 +82,12 @@ Click a wallet name in the position list to open **Trade context**. You can also
 - **Compare an entry:** see the current mark compared with the watched entry, the position’s age, and when this page first saw it. “Worse” means a higher long entry or a lower short entry. A stale price pauses the comparison.
 - **Wallet closed-trade sample:** load recent records, then optionally load older ones. Results subtract the venue’s user-paid fees and keep PAPER separate. Statistics describe the loaded sample; win rate stays unavailable below 20 loaded closed trades.
 - **Prepare my entry draft:** fills the entry direction/price using your own native margin and leverage, with empty exits. Review it in the ticket and use **Set trigger** to arm it. Preparing a draft submits nothing and will not overwrite an existing order/exit edit.
+
+## See the watched-wallet overview
+
+With public wallet watching enabled, **Watched exposure** shows long/short quantities, net quantity, how many wallets lean each way, and the largest wallet’s share of gross exposure. The colored bar compares long and short quantities for the current asset.
+
+The feed count tells you how much of your selected list is current. Missing or stale feeds are excluded and labeled as a partial sample. A wallet with no current positions on this asset counts as flat. Near-balanced means its net quantity is under 10% of its gross quantity. The chart’s minimum-size filter does not apply here, so small opposite legs remain included. These totals describe your watched sample; they are not a market-wide indicator or a prediction.
 
 ## Choose wallet alerts
 
