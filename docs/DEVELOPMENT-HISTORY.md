@@ -568,11 +568,11 @@ Armed exits and entries awaiting a fill show **Remove SL / TP**. This disables t
 - Updated privacy disclosure and simple installation/use instructions. No new host permissions or developer data collection. The previously submitted Store package is unchanged.
 - Verification: 380 automated tests; production build; localhost browser checks for drafts, read-only feed/overlay behavior, DPR, filters and stale hiding; real unpacked extension against public signed-out wallet SSE and native chart pan/zoom. Headless tab visibility pause is simulated. No funded execution was performed or certified.
 
-## v0.7.72 — Live wallet moves and visible chart names
+## v0.7.73 — Live wallet moves and visible chart names
 
 - Fixed a protocol bug in v0.7.71: the watcher understood initial full snapshots but rejected subsequent incremental wallet frames. It now applies validated account-revision patches in the same live stream, including added/removed position IDs and partial state. Revision gaps hide stale data and request a fresh snapshot.
 - Wallet names (or editable local labels / short-address fallbacks) stay visible on chart levels. Nearby levels from different wallets retain separate labels with connectors to their actual price anchors. A named ↑/↓ rail shows positions outside the current price range.
 - Added observed open/change/removal activity in the panel and briefly on the chart. No fake new-trade activity on bootstrap or heartbeat. Removals are described as no longer open, without guessing a liquidation/close reason.
 - Added multi-frame protocol and browser regressions exercising actual patch shapes, names, aliases, offscreen levels, activity and no reconnect on a valid move. No trade execution changes or developer data collection.
 
-Validation for v0.7.72: 386 automated tests, production build, browser replay of consecutive account patches (open/removal without reconnect), per-wallet names/aliases at the same price, offscreen badges, and signed-out public-feed/native-chart smoke checks. No funded trade was placed.
+Validation for v0.7.73: 386 automated tests, production build, browser replay of consecutive account patches (open/removal without reconnect), per-wallet names/aliases at the same price, offscreen badges, and signed-out public-feed/native-chart smoke checks. No funded trade was placed.

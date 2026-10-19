@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, and **stop loss /
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.72).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.73).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
