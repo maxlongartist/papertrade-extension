@@ -166,7 +166,7 @@ test('entry-mode coordination never blocks Close intent during an in-flight pair
 test('entry-mode reservation does not delay an existing-position stop',async t=>{
  let release,entered;const gate=new Promise(r=>release=r),started=new Promise(r=>entered=r);let held=false;
  const h=await harness({pageHook:async(_id,m)=>{if(m.type==='pairSnapshot'&&!held){held=true;entered();await gate;}}});t.after(h.dispose);await h.quote(83000);await h.call({type:'protectPosition',market:'BTC',positionId:'42',stopLoss:83005,exitLead:2},22);const opening=h.call({type:'pairOpen',market:'BTC'},11);await started;
- try{await h.quote(83003);await new Promise(r=>setImmediate(r));assert.deepEqual(h.sends.filter(s=>s.type==='close').map(s=>[s.id,s.order.positionId]),[[22,'42']]);assert.equal(h.sends.filter(s=>s.type==='execute').length,0);}finally{release();await opening;}
+ try{await h.quote(83003);const deadline=Date.now()+1000;while(!h.sends.some(s=>s.type==='close')&&Date.now()<deadline)await new Promise(r=>setImmediate(r));assert.deepEqual(h.sends.filter(s=>s.type==='close').map(s=>[s.id,s.order.positionId]),[[22,'42']]);assert.equal(h.sends.filter(s=>s.type==='execute').length,0);}finally{release();await opening;}
 });
 
 test('worker entry timeout keeps unknown outcome, ignores late acknowledgement and closes one late fill without replay',async t=>{

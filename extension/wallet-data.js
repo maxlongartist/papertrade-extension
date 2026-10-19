@@ -90,7 +90,8 @@ export function createWalletReducer(address,instruments){
 }
 export const walletName=w=>w.alias?.trim()||w.name?.trim()||`${w.address.slice(0,6)}…${w.address.slice(-4)}`;
 export function positionChanges(previous,next,at=Date.now()){
-  if(!previous)return [];
+  // Full snapshots establish a baseline after gaps, not observed trade events.
+  if(!previous||next.publication==='snapshot'||previous.address!==next.address)return [];
   const before=new Map(previous.positions.map(p=>[p.id,p])),after=new Map(next.positions.map(p=>[p.id,p])),events=[];
   for(const p of next.positions){const old=before.get(p.id);if(!old)events.push({...p,action:'opened',at,address:next.address});else if(['entry','margin','leverage','liquidation','side','market'].some(key=>old[key]!==p[key]))events.push({...p,action:'changed',at,address:next.address});}
   for(const p of previous.positions)if(!after.has(p.id))events.push({...p,action:'removed',at,address:next.address});

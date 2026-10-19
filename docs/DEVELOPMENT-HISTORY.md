@@ -15,6 +15,14 @@ The connected wallet comes from Papertrade’s native wallet control and is chec
 
 The two opens are separate requests, not atomic. Equal margin and leverage can leave a small quantity mismatch when fill prices differ. Prices and fills are not guaranteed, and cash break-even is not guaranteed. A submitted entry/Close is never blindly repeated after a missing response. Unknown entries without an identified fill remain unresolved rather than pretending that an empty position list proves cancellation. Check native Status if a request stays uncertain. Chrome worker/page reloads retain tracking within the same browser tab session; a full browser restart can invalidate the original tab binding. The new Restore control can reconnect previously identified native position IDs after checking the same wallet and market. It never guesses an unbound entry or sends trades while restoring.
 
+## v0.7.77 — Reliable observed activity and clearer alerts
+
+- Reset observation baselines after feed interruptions, hidden-tab resumes and watch restarts. Full snapshots update positions without presenting gap changes as fresh live moves.
+- Wallet alerts now identify the asset, long/short direction, position IDs and receipt time. Reversal alerts distinguish the previous and new net direction; gross-exposure increases are labeled as changes in gross exposure.
+- Bound multi-position alert labels to three IDs plus a count. All external text continues through textContent.
+- Regression verification exercises replacement snapshots and disable/re-enable gaps, then proves subsequent incremental updates still produce live activity. Corrected an existing asynchronous Web Crypto test to wait for observable dispatch while its entry reservation remains held.
+- Validation: 407 tests, production build and isolated trade-context browser checks. No funded trades.
+
 ## What’s new in v0.7.63
 
 - Added an optional donation card above Network queue with the message “You're gonna make it, champ — don't forget your boy uwu <3” and address `0x0512559efEA81eA42F418926aFB63491f493Cd9A`.

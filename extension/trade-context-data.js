@@ -47,6 +47,14 @@ export function walletAlertCandidates(previous,next){
     if(['net long','net short'].includes(a.bias)&&['net long','net short'].includes(b.bias)&&a.bias!==b.bias)out.push({type:'reversed',market,amount:gross(after),ids:after.map(p=>p.id)});
   }return out.map(e=>({...e,address:next.address}));
 }
+export function walletAlertSummary(event,previous,next){
+  const amount='$'+event.amount.toLocaleString(undefined,{maximumFractionDigits:0});
+  if(event.type==='reversed')return `${event.market} · ${walletExposure(previous.positions,event.market).bias} → ${walletExposure(next.positions,event.market).bias} · ${amount} gross`;
+  if(event.type==='increased')return `${event.market} · gross exposure increased by ${amount}`;
+  const rows=event.type==='removed'?previous.positions:next.positions,ids=new Set(event.ids),positions=rows.filter(p=>ids.has(p.id)&&p.market===event.market),label=event.type==='removed'?'no longer open':'new';
+  const details=positions.slice(0,3).map(p=>`${p.side} #${p.id}`).join(', '),extra=positions.length>3?` +${positions.length-3} more`:'';
+  return `${event.market} · ${label} ${details}${extra} · ${amount}`;
+}
 export function createAlertGate(now=Date.now){
   const last=new Map();return (previous,next,settings,{market,enabled=true,publication='update'}={})=>{
     if(!enabled||settings?.enabled!==true||publication!=='update')return [];

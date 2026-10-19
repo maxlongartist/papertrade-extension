@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {closedTradePage,closedStats,tradeHistoryUrl,walletExposure,entryComparison,createAlertGate,walletAlertCandidates} from '../extension/trade-context-data.js';import {tradeRow} from './helpers/closed-trades-fixture.js';
+import {closedTradePage,closedStats,tradeHistoryUrl,walletExposure,entryComparison,createAlertGate,walletAlertCandidates,walletAlertSummary} from '../extension/trade-context-data.js';import {tradeRow} from './helpers/closed-trades-fixture.js';
 const address='0x'+'1'.repeat(40),pos=(patch={})=>({id:'1',market:'BTC',side:'long',entry:83000,notional:8300,margin:20,leverage:415,openedAt:100000,...patch});
 const tick={mid:83100,price:83100,bid:83099,ask:83101,sourceAt:200000,receivedAt:200000};
 test('venue history keeps exact fee subtraction, scale and PAPER separate',()=>{const data=closedTradePage({items:[tradeRow({adjustedPnlRaw:'1000000000000000001',userPaidFeeRaw:'1000000000000000000'})],nextCursor:null});assert.equal(data.items[0].netRaw,'1');assert.equal(data.items[0].entry,83000);assert.equal(data.items[0].exit,83100);assert.equal(data.items[0].paperRaw,'2000000000000000000');});
@@ -14,4 +14,13 @@ test('entry comparison is side-aware, displays reference age and excludes stale/
 test('wallet move alerts distinguish direction reversal, gross growth and removal without guessing a liquidation',()=>{const before={address,positions:[pos()]},next={address,positions:[pos({id:'2',side:'short',notional:10000})]};assert.deepEqual(walletAlertCandidates(before,next).map(e=>e.type),['opened','removed','increased','reversed']);assert.deepEqual(walletAlertCandidates(null,next),[]);});
 test('selective alerts ignore snapshots, other markets, undersized changes and disabled wallets and enforce cooldown',()=>{let at=1000;const gate=createAlertGate(()=>at),before={address,positions:[]},next={address,positions:[pos()]},settings={enabled:true,minimum:5000,cooldown:30,types:{opened:true}};
  assert.deepEqual(gate(before,next,settings,{market:'BTC',publication:'snapshot'}),[]);assert.deepEqual(gate(before,next,settings,{market:'ETH'}),[]);assert.deepEqual(gate(before,next,settings,{market:'BTC',enabled:false}),[]);assert.deepEqual(gate(before,next,{...settings,minimum:10000},{market:'BTC'}),[]);assert.equal(gate(before,next,settings,{market:'BTC'}).length,1);assert.equal(gate(before,next,settings,{market:'BTC'}).length,0);at+=30000;assert.equal(gate(before,next,settings,{market:'BTC'}).length,1);
+});
+
+test('wallet alerts name the asset, direction and IDs, bound long batches, and describe exposure changes accurately',()=>{
+ const previous={address,positions:[pos()]},next={address,positions:[pos({id:'2',side:'short',notional:10000})]},events=walletAlertCandidates(previous,next);
+ assert.equal(walletAlertSummary(events[0],previous,next),'BTC · new short #2 · $10,000');
+ assert.equal(walletAlertSummary(events[1],previous,next),'BTC · no longer open long #1 · $8,300');
+ assert.equal(walletAlertSummary(events[2],previous,next),'BTC · gross exposure increased by $1,700');
+ assert.equal(walletAlertSummary(events[3],previous,next),'BTC · net long → net short · $10,000 gross');
+ const batch={address,positions:Array.from({length:6},(_,i)=>pos({id:String(i+2)}))};assert.match(walletAlertSummary(walletAlertCandidates({address,positions:[]},batch)[0],{address,positions:[]},batch),/long #2, long #3, long #4 \+3 more/);
 });

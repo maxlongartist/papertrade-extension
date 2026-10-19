@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.76).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.77).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -87,7 +87,7 @@ Click a wallet name in the position list to open **Trade context**. You can also
 
 Open **Wallet alerts** and enable in-page alerts. Choose event types, a minimum changed notional and a cooldown. Under **Wallets & filters**, each wallet has its own **Alerts** checkbox.
 
-Alerts can cover new positions, positions no longer open, increases in gross exposure, and net direction reversals. Initial/reconnect snapshots do not trigger alerts. A removal does not tell us whether a position was manually closed or liquidated. Sounds are optional and require a click in the panel after refreshing. Keep the tab visible; these are browser alerts, not a background notification service.
+Alerts can cover new positions, positions no longer open, increases in gross exposure, and net direction reversals. Alerts show the asset, direction, position IDs and time received. Initial/reconnect snapshots reset the observation baseline; changes made during a gap are not presented as fresh live moves or alerted. A removal does not tell us whether a position was manually closed or liquidated. Sounds are optional and require a click in the panel after refreshing. Keep the tab visible; these are browser alerts, not a background notification service.
 
 ## Review your own results
 

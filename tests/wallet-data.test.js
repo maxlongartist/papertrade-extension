@@ -45,3 +45,10 @@ test('coincident wallet entries retain separate named groups and nonoverlapping 
  const {namedWalletGroups,labelRows}=await import('../extension/wallet-data.js'),groups=namedWalletGroups([{address:'a',name:'Alice',price:10,side:'long',kind:'entry'},{address:'b',name:'Bob',price:10,side:'long',kind:'entry'}],{slope:-1,intercept:100});
  assert.equal(groups.length,2);const rows=labelRows(groups,65,150);assert.equal(rows[0].y,90);assert.equal(rows[1].y,90);assert.ok(rows[1].labelY-rows[0].labelY>=22);assert.equal(rows[0].items[0].name,'Alice');assert.equal(rows[1].items[0].name,'Bob');
 });
+
+test('full snapshots and cross-wallet snapshots never manufacture live position moves',async()=>{
+ const {positionChanges}=await import('../extension/wallet-data.js'),previous={address,positions:[{id:'1',market:'BTC',side:'long'}]},next={address,publication:'snapshot',positions:[{id:'2',market:'BTC',side:'short'}]};
+ assert.deepEqual(positionChanges(previous,next),[]);
+ assert.deepEqual(positionChanges(previous,{...next,publication:'update',address:'0x'+'2'.repeat(40)}),[]);
+ assert.deepEqual(positionChanges(next,{address,publication:'update',positions:[...next.positions,{id:'3',market:'BTC',side:'long'}]},100).map(e=>[e.id,e.action]),[['3','opened']]);
+});
