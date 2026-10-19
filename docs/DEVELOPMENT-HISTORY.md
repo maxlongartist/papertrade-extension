@@ -15,6 +15,14 @@ The connected wallet comes from Papertrade’s native wallet control and is chec
 
 The two opens are separate requests, not atomic. Equal margin and leverage can leave a small quantity mismatch when fill prices differ. Prices and fills are not guaranteed, and cash break-even is not guaranteed. A submitted entry/Close is never blindly repeated after a missing response. Unknown entries without an identified fill remain unresolved rather than pretending that an empty position list proves cancellation. Check native Status if a request stays uncertain. Chrome worker/page reloads retain tracking within the same browser tab session; a full browser restart can invalidate the original tab binding. The new Restore control can reconnect previously identified native position IDs after checking the same wallet and market. It never guesses an unbound entry or sends trades while restoring.
 
+## v0.7.81 — Recover wallet feeds without retry storms
+
+- A single snapshot no longer resets exponential backoff on flapping streams. Observed stream health for 30 seconds resets it; bounded upward jitter staggers retries.
+- HTTP 429 establishes a shared page-local wallet-feed cooldown, honoring Retry-After within the existing one-hour cap and using at least five seconds without a usable header. Watch restarts and panel remounts on the same page keep the cooldown; healthy streams are not interrupted.
+- Heartbeats alone cannot keep an initial snapshot lookup pending beyond 30 seconds. Disposal cancels retries and late callbacks cannot fetch.
+- Added deterministic stream-lifecycle tests plus browser coverage for peer 429s, healthy-feed continuity, watch restarts, empty stale totals and eventual recovery. Trading and price-feed execution paths remain separate.
+- Validation: 415 tests, production build, isolated overlay/trade-context/watchlist checks and signed-out live public-wallet checks. No funded execution.
+
 ## v0.7.80 — Inspect wallet positions directly from the chart
 
 - Chart labels and out-of-view wallet labels open trade context. Single-position labels and position-list buttons select the exact wallet/position; grouped labels prompt a choice.

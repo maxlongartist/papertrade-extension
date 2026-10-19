@@ -14,7 +14,7 @@ try{
  await page.evaluate(async()=>{
   document.body.innerHTML='<div id="watch" style="width:460px;margin:20px"></div>';
   const a='0x'+'a'.repeat(40),b='0x'+'b'.repeat(40),c='0x'+'c'.repeat(40);
-  globalThis.watchFixture={requests:[],saved:{publicWalletWatchV1:{enabled:true,chart:false,drafts:false,wallets:[{address:a,name:'Manual',alias:'My friend',selected:true,alerts:false},{address:b,name:'Old venue name',alias:'Custom name',selected:false,alerts:false}]}},ranked:[{address:b,leaderboardName:'Updated venue name'},{address:c,leaderboardName:'New ranked wallet'}]};
+  globalThis.watchFixture={requests:[],streams:new Map(),saved:{publicWalletWatchV1:{enabled:true,chart:false,drafts:false,wallets:[{address:a,name:'Manual',alias:'My friend',selected:true,alerts:false},{address:b,name:'Old venue name',alias:'Custom name',selected:false,alerts:false}]}},ranked:[{address:b,leaderboardName:'Updated venue name'},{address:c,leaderboardName:'New ranked wallet'}]};
   const original=fetch;
   globalThis.fetch=async(url,options={})=>{
    const path=new URL(url,location.origin);
@@ -26,9 +26,10 @@ try{
     if(watchFixture.hold){watchFixture.pending=true;await new Promise(r=>watchFixture.release=r);}
     return Response.json({ok:true,accounts});
    }
+   if(path.pathname==='/state/user/live'&&path.searchParams.get('wallet')==='0x'+'c'.repeat(40)&&watchFixture.rateLimitC)return new Response('',{status:429,headers:{'Retry-After':'5'}});
    if(path.pathname==='/state/user/live'&&path.searchParams.get('wallet')===watchFixture.pausedAddress)return new Promise((_resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError'))));
    if(path.pathname==='/state/user/live')return new Response(new ReadableStream({start(controller){
-    options.signal.addEventListener('abort',()=>controller.error(new DOMException('Aborted','AbortError')));
+    watchFixture.streams.set(path.searchParams.get('wallet'),controller);options.signal.addEventListener('abort',()=>controller.error(new DOMException('Aborted','AbortError')));
     controller.enqueue(new TextEncoder().encode('event: wallet\ndata: '+JSON.stringify({address:path.searchParams.get('wallet'),walletRevision:1,accountRevision:1,openPositions:path.searchParams.get('wallet')===a?[['1',0,true,false,'830000','830000000000000000000',100,'820000',Date.now()-60000]]:path.searchParams.get('wallet')===c?[['1',0,false,false,'830000','415000000000000000000',100,'840000',Date.now()-60000]]:[]})+'\n\n'));
    }}),{headers:{'content-type':'text/event-stream'}});
    throw Error('Unexpected public request '+path.pathname);
@@ -66,7 +67,21 @@ try{
  assert.equal(await root.locator(`input[aria-label="Display name for ${a}"]`).inputValue(),'My edited friend');assert.equal(await root.locator(`input[aria-label="Watch positions for ${b}"]`).isChecked(),false);assert.equal(await root.locator('#wallets .wallet-row').count(),10);
  await root.locator('#load').click();await root.locator('#watchNotice').filter({hasText:'0 added · 7 already saved · 3 did not fit'}).waitFor();
  assert.equal(await page.evaluate(()=>watchFixture.requests.some(r=>r.method!=='GET')),false);
- await page.screenshot({path:resolve(out,'watchlist.png')});await root.getByText('Wallets & filters',{exact:true}).click();await root.locator('#exposure').scrollIntoViewIfNeeded();await page.screenshot({path:resolve(out,'exposure.png')});await page.evaluate(()=>watchFixture.dispose());
- await writeFile(resolve(out,'verification.json'),JSON.stringify({passed:true,simulated:true,manualWalletPreserved:true,optOutsPreserved:true,alertsPreserved:true,pendingAliasPreserved:true,nameOnlyRefreshDoesNotRestartFeeds:true,tenWalletLimit:true,quantityBasedOverview:true,concentrationVisible:true,partialFeedCoverage:true,chartMinimumDoesNotHideHedges:true,choicesSurviveRemount:true,venueWrites:0,fundedExecutionVerified:false},null,2));
+ await page.screenshot({path:resolve(out,'watchlist.png')});await root.getByText('Wallets & filters',{exact:true}).click();await root.locator('#exposure').scrollIntoViewIfNeeded();await page.screenshot({path:resolve(out,'exposure.png')});
+ // One failing feed should not interrupt healthy streams; an explicit watch restart respects the shared cooldown.
+ const cRequestsBeforeFailure=await page.evaluate(()=>watchFixture.requests.filter(r=>r.url.includes('/state/user/live?wallet=0x'+'c'.repeat(40))).length);
+ await page.evaluate(()=>{watchFixture.rateLimitC=true;watchFixture.streams.get('0x'+'c'.repeat(40)).error(new Error('Fixture disconnect'));});
+ await root.locator('#status').filter({hasText:'8/9 wallet feeds live'}).waitFor();
+ await page.waitForFunction(count=>watchFixture.requests.filter(r=>r.url.includes('/state/user/live?wallet=0x'+'c'.repeat(40))).length>count,cRequestsBeforeFailure);
+ await root.locator('#status').filter({hasText:'Rate limited'}).waitFor();
+ const beforeCooldownRestart=await page.evaluate(()=>watchFixture.requests.filter(r=>r.url.startsWith('/state/user/live')).length);
+ await root.locator('#enabled').uncheck();await root.locator('#enabled').check();await root.locator('#status').filter({hasText:'cooling down after rate limit'}).waitFor();
+ assert.equal(await page.evaluate(()=>watchFixture.requests.filter(r=>r.url.startsWith('/state/user/live')).length),beforeCooldownRestart,'restarting the watch cannot bypass shared Retry-After');
+ assert.match(await root.locator('#exposureCoverage').innerText(),/0\/9 selected feeds current/);assert.match(await root.locator('#exposureTotals').innerText(),/Waiting for fresh/);
+ await page.evaluate(()=>{watchFixture.dispose();watchFixture.mount();});await root.locator('#status').filter({hasText:'cooling down after rate limit'}).waitFor();assert.equal(await page.evaluate(()=>watchFixture.requests.filter(r=>r.url.startsWith('/state/user/live')).length),beforeCooldownRestart,'rebuilding the panel on the same page cannot bypass the cooldown');
+ await page.screenshot({path:resolve(out,'cooldown.png')});await page.evaluate(()=>watchFixture.rateLimitC=false);await root.locator('#status').filter({hasText:'9/9 wallet feeds live'}).waitFor({timeout:12000});
+ await root.locator('#exposureTotals').filter({hasText:'66.7% long by quantity'}).waitFor();
+ await page.evaluate(()=>watchFixture.dispose());
+ await writeFile(resolve(out,'verification.json'),JSON.stringify({passed:true,simulated:true,manualWalletPreserved:true,optOutsPreserved:true,alertsPreserved:true,pendingAliasPreserved:true,nameOnlyRefreshDoesNotRestartFeeds:true,tenWalletLimit:true,quantityBasedOverview:true,concentrationVisible:true,partialFeedCoverage:true,chartMinimumDoesNotHideHedges:true,choicesSurviveRemount:true,sharedCooldownSurvivesWatchRestart:true,sharedCooldownSurvivesPanelRemount:true,healthyFeedsRemainLiveDuringPeerRateLimit:true,recoveryAfterCooldown:true,venueWrites:0,fundedExecutionVerified:false},null,2));
  console.log('Watchlist preservation fixture passed.');
 }finally{await browser.close();}

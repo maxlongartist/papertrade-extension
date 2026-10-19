@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.80).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.81).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -82,6 +82,12 @@ Click a wallet name in the position list to open **Trade context**. You can also
 - **Compare an entry:** see the current mark compared with the watched entry, the position’s age, and when this page first saw it. “Worse” means a higher long entry or a lower short entry. A stale price pauses the comparison.
 - **Wallet closed-trade sample:** load recent records, then optionally load older ones. Results subtract the venue’s user-paid fees and keep PAPER separate. Statistics describe the loaded sample; win rate stays unavailable below 20 loaded closed trades.
 - **Prepare my entry draft:** fills the entry direction/price using your own native margin and leverage, with empty exits. Review it in the ticket and use **Set trigger** to arm it. Preparing a draft submits nothing and will not overwrite an existing order/exit edit.
+
+## When wallet feeds disconnect or get rate limited
+
+Wallet feeds reconnect automatically with increasing, staggered delays. A connection has to remain healthy for 30 seconds before its retry backoff resets. If a feed receives HTTP 429, other wallet-feed reconnects on the same page wait for the shared cooldown. Turning watching off and on, or rebuilding the panel on the same page, keeps that cooldown. Existing healthy streams continue running.
+
+The status line shows the retry reason and next attempt time. Missing feeds are excluded from **Watched exposure** until fresh snapshots arrive. A connection that sends only heartbeats without an initial snapshot times out after 30 seconds. These delays apply to optional public wallet feeds; they do not delay limit/SL/TP checks or native trading actions. Separate tabs have separate cooldowns.
 
 ## Inspect a wallet from the chart
 
