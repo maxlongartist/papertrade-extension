@@ -2,7 +2,7 @@
 
 **You only need Chrome and the ZIP download. No coding or terminal commands.**
 
-1. **[Click here to open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.77).**
+1. **[Click here to open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.78).**
 2. Find **Assets**. Click it if the file list is closed.
 3. Download **`papertrade-manual-pair-v….zip`**. Do not choose either “Source code” file.
 4. **Unzip the download.** On a Mac, double-click the ZIP. On Windows, right-click it and choose **Extract All**.
@@ -29,7 +29,7 @@ You selected the wrong folder, or the ZIP is still zipped. Unzip it, then select
 
 **I downloaded “Source code” and can't find the right files.**
 
-Go back to [the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.77). Get `papertrade-manual-pair-v….zip` under Assets instead.
+Go back to [the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.78). Get `papertrade-manual-pair-v….zip` under Assets instead.
 
 **Nothing appears on Papertrade.**
 

@@ -71,3 +71,5 @@ The wallet decoder must handle both full `openPositions` snapshots and `baseAcco
 `npm run verify:trade-context` uses only a localhost fake venue: paired exposure, stale comparisons, draft-only preparation and edit guards, sample pagination, alerts/cooldowns/mutes/audio failure, journal fee/PAPER math, notes, export, two-step clear and late-response wallet switching. `verify:public-wallets` additionally loads real public closed-trade history from an unpacked signed-out extension. None of these checks place funded trades.
 
 Wallet activity baselines reset on reconnect/retry/watch restart. Full snapshots are not observed trade events; only incremental changes against the current baseline produce moves. Alert receipt time is not a venue execution timestamp.
+
+Leaderboard discovery merges into a maximum-ten personal watchlist instead of replacing it. Existing selected/alerts/alias values are authoritative; incoming public names may refresh. When only metadata changes, existing subscriptions continue. Run `npm run verify:watchlist` with the same Playwright environment as the other isolated browser verifiers.

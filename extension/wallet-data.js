@@ -19,6 +19,16 @@ export function walletProjection(data,address,instruments){
   }
   return {address:address.toLowerCase(),revision:data.walletRevision,positions};
 }
+// Leaderboard discovery adds to a personal watchlist; it never replaces saved choices.
+export function mergeWatchedWallets(current,incoming){
+  const wallets=[],byAddress=new Map();let added=0,matched=0,skipped=0;
+  for(const wallet of current){if(!validAddress(wallet?.address))continue;const address=wallet.address.toLowerCase();if(byAddress.has(address)||wallets.length>=10)continue;const copy={...wallet,address};wallets.push(copy);byAddress.set(address,copy);}
+  const seen=new Set();for(const wallet of incoming){if(!validAddress(wallet?.address))continue;const address=wallet.address.toLowerCase();if(seen.has(address))continue;seen.add(address);const existing=byAddress.get(address),name=typeof wallet.name==='string'?wallet.name.slice(0,40):'';
+    if(existing){existing.name=name;existing.nameChecked=true;matched++;}
+    else if(wallets.length<10){const copy={address,name,nameChecked:true,alias:'',selected:true,alerts:true};wallets.push(copy);byAddress.set(address,copy);added++;}
+    else skipped++;
+  }return {wallets,added,matched,skipped};
+}
 export function leaderboardWallets(data){
   if(data?.ok!==true||!Array.isArray(data.accounts))throw Error('Leaderboard unavailable.');
   const seen=new Set();return data.accounts.filter(r=>validAddress(r.address)&&!seen.has(r.address.toLowerCase())&&seen.add(r.address.toLowerCase())).slice(0,10).map(r=>({address:r.address.toLowerCase(),name:typeof r.leaderboardName==='string'?r.leaderboardName.slice(0,40):''}));

@@ -52,3 +52,13 @@ test('full snapshots and cross-wallet snapshots never manufacture live position 
  assert.deepEqual(positionChanges(previous,{...next,publication:'update',address:'0x'+'2'.repeat(40)}),[]);
  assert.deepEqual(positionChanges(next,{address,publication:'update',positions:[...next.positions,{id:'3',market:'BTC',side:'long'}]},100).map(e=>[e.id,e.action]),[['3','opened']]);
 });
+
+test('leaderboard discovery preserves saved wallets, aliases, opt-outs and alerts without mutating input',async()=>{
+ const {mergeWatchedWallets}=await import('../extension/wallet-data.js'),a='0x'+'a'.repeat(40),b='0x'+'b'.repeat(40),c='0x'+'c'.repeat(40),saved=[{address:a,name:'Manual',alias:'Friend',selected:true,alerts:false},{address:b,name:'Old',alias:'Custom',selected:false,alerts:false}],before=structuredClone(saved);
+ const result=mergeWatchedWallets(saved,[{address:b.toUpperCase().replace('0X','0x'),name:'New venue name'},{address:c,name:'New whale'},{address:c,name:'Duplicate'}]);
+ assert.deepEqual(saved,before);assert.equal(result.added,1);assert.equal(result.matched,1);assert.equal(result.skipped,0);assert.equal(result.wallets.length,3);assert.deepEqual(result.wallets[0],saved[0]);assert.deepEqual(result.wallets[1],{...saved[1],name:'New venue name',nameChecked:true});assert.equal(result.wallets[2].selected,true);
+});
+test('leaderboard discovery keeps the ten-wallet budget and consolidates saved address duplicates',async()=>{
+ const {mergeWatchedWallets}=await import('../extension/wallet-data.js'),saved=Array.from({length:10},(_,i)=>({address:'0x'+String(i).padStart(40,'0'),selected:i!==0})),incoming=[{address:saved[0].address,name:'Updated'},{address:'0x'+'f'.repeat(40),name:'Does not fit'}],result=mergeWatchedWallets(saved,incoming);
+ assert.equal(result.wallets.length,10);assert.equal(result.added,0);assert.equal(result.matched,1);assert.equal(result.skipped,1);assert.equal(result.wallets[0].selected,false);assert.ok(!result.wallets.some(w=>w.address===incoming[1].address));assert.equal(mergeWatchedWallets([saved[0],saved[0],{address:'bad'}],[]).wallets.length,1);
+});

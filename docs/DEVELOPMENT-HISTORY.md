@@ -15,6 +15,14 @@ The connected wallet comes from Papertrade’s native wallet control and is chec
 
 The two opens are separate requests, not atomic. Equal margin and leverage can leave a small quantity mismatch when fill prices differ. Prices and fills are not guaranteed, and cash break-even is not guaranteed. A submitted entry/Close is never blindly repeated after a missing response. Unknown entries without an identified fill remain unresolved rather than pretending that an empty position list proves cancellation. Check native Status if a request stays uncertain. Chrome worker/page reloads retain tracking within the same browser tab session; a full browser restart can invalidate the original tab binding. The new Restore control can reconnect previously identified native position IDs after checking the same wallet and market. It never guesses an unbound entry or sends trades while restoring.
 
+## v0.7.78 — Preserve the personal wallet watchlist
+
+- Changed leaderboard discovery to **Add top wallets**: adds ranked wallets into free slots and updates public names without replacing saved addresses, aliases, disabled watches or per-wallet alert preferences.
+- Reports additions, matches and wallets that did not fit the ten-wallet limit. Duplicate stored addresses are consolidated before feeds start.
+- Name-only refreshes preserve live subscriptions instead of reconnecting them. An in-progress name edit is captured before applying delayed leaderboard results.
+- Added pure merge regressions and an isolated browser fixture covering opt-outs, capacity, live-feed continuity, delayed edits and preferences surviving remount.
+- Validation: 409 tests, production build and browser watchlist/overlay/trade-context checks. No funded execution.
+
 ## v0.7.77 — Reliable observed activity and clearer alerts
 
 - Reset observation baselines after feed interruptions, hidden-tab resumes and watch restarts. Full snapshots update positions without presenting gap changes as fresh live moves.

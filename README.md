@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.77).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.78).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -58,7 +58,7 @@ Your saved entry appears under **Active orders**. Click **Cancel order** there t
 ## See public wallet positions on the chart
 
 1. Find **Public wallet levels** below the trading controls. Turn on **Watch public wallets**.
-2. Open **Wallets & filters** and click **Load top 10**, or add a public wallet address. The period menu changes the leaderboard used the next time you click Load top 10.
+2. Open **Wallets & filters** and click **Add top wallets**, or enter a public wallet address. The period menu chooses the leaderboard used for that click. New wallets fill free slots in your list; saved wallets, custom names, watch selections and alert choices stay. The list holds up to 10 wallets—use **×** beside one to make room.
 3. Turn on **Show levels on main chart**. Names are printed on the chart beside each wallet’s levels: green for long, red for short. Hover for full position details. Positions belonging to the same wallet are grouped when nearby; different wallets keep their own labels. Positions outside the visible price range appear in a named ↑/↓ list. You can also show liquidation levels or filter out small positions.
 4. Click a wallet name in the list to open its public Papertrade portfolio. Uncheck a wallet to hide it, or turn watching off to stop the feeds.
 
