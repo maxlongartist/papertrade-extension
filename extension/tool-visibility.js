@@ -1,6 +1,6 @@
 // Presentation only: never unmounts controls or changes order/watch state.
 const preference='papertrade.toolsHidden.v1';
-const targets=['paperpilot-trading-workspace','paperpilot-extension','paperpilot-manual-pair','paperpilot-network-queue','paperpilot-wallets','paperpilot-trade-tape','paperpilot-monitor','paperpilot-tool-tabs','paperpilot-chart-overlay','paperpilot-chart-analysis','paperpilot-analysis-overlay'];
+const targets=['paperpilot-trading-workspace','paperpilot-extension','paperpilot-manual-pair','paperpilot-network-queue','paperpilot-wallets','paperpilot-trade-tape','paperpilot-monitor','paperpilot-tool-tabs','paperpilot-chart-overlay','paperpilot-chart-analysis','paperpilot-analysis-overlay','paperpilot-layout-controls'];
 export function mountToolVisibility({getAnchor,storage=chrome.storage.local}={}){
   let hidden=false,revision=0,disposed=false,saving=Promise.resolve();
   const style=document.createElement('style');style.id='paperpilot-visibility-style';

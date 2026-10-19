@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.89).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.90).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -37,6 +37,14 @@ Stuck? See the short [installation help](https://github.com/maxlongartist/papert
 [![Network queue and Manual pair controls on Papertrade](https://raw.githubusercontent.com/maxlongartist/papertrade-extension/main/docs/images/manual-pair.png)](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/images/manual-pair.png)
 
 The **Network queue** box estimates how busy Papertrade is. It does not tell you exactly when your trade will finish. A pair opens only when you click; it does not automatically repeat.
+
+## Keep the chart comfortable
+
+On desktop, the chart now sizes to the window instead of stretching to fit every tool. The sidebar scrolls on its own, so opening settings, loading wallet data or reading the tape keeps the chart and Positions in place. Native chart pan, zoom and resize handles still work.
+
+The small bar at the top of the sidebar has **Trade**, **Indicators**, and **Wallets** shortcuts. They scroll the tools without scrolling the chart. **Fit layout** restores the automatic chart height and sidebar width after manual resizing. It does not reset chart prices, indicator settings or orders.
+
+On narrow mobile screens, Papertrade's full-width chart and normal page scrolling are preserved. **Hide tools** still hides the extension panels and overlays without stopping existing order monitoring.
 
 ## EMA, VWAP and the liquidation heatmap
 

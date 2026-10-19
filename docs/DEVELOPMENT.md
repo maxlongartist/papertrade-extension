@@ -91,3 +91,9 @@ Public wallet feeds share a page-local retry coordinator owned by the content mo
 Public map schema was checked against live BTC/ETH responses on 2026-10-19: `GET /query/markets/{instrumentId}/liquidation-map?range=...`; each bucket holds long/short USDC notional in 18 decimals and long/short position counts. Bounds use the instrument price scale; responses are bound to the requested market and range. Map bars are a snapshot, not historical time series. Hyperliquid candleSnapshot documentation: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#candle-snapshot .
 
 Run `npm run verify:chart-analysis` with the same Playwright environment as other browser verifiers. It uses synthetic public responses only and checks DPR/pan alignment, LIVE/reset gating, stale axes/source hiding, toggles, persisted settings, 429 backoff, hide/resume, disposal and absence of trading requests.
+
+## Independent chart and sidebar layout
+
+`trading-layout.js` overrides the native desktop `min-height:min-content` / non-shrinking sidebar rules only while the extension workspace is mounted. The upper split gets a responsive flex basis and a viewport height cap; the sidebar's panel and scroll container use zero minimum heights and an independent vertical scrollport. No fixed canvas dimensions, polling-based viewport writes, page internals or trading handlers are used. Native inline resize choices remain effective within viewport limits. Fit layout removes those two inline size overrides only; section shortcuts scroll the sidebar only. Mobile retains native flow.
+
+`npm run verify:trading-layout` loads the actual extension in a fresh signed-out browser and checks desktop/mobile sizes, 12,000 pixels of injected sidebar content, native keyboard resizing, canvas pan/wheel hit testing, layout reset, hide/show stability, sidebar-only jumps, route changes, unchanged native ticket inputs and empty order/pair storage.
