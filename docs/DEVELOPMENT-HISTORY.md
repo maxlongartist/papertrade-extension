@@ -576,3 +576,7 @@ Armed exits and entries awaiting a fill show **Remove SL / TP**. This disables t
 - Added multi-frame protocol and browser regressions exercising actual patch shapes, names, aliases, offscreen levels, activity and no reconnect on a valid move. No trade execution changes or developer data collection.
 
 Validation for v0.7.74: 386 automated tests, production build, browser replay of consecutive account patches (open/removal without reconnect), per-wallet names/aliases at the same price, offscreen badges, and signed-out public-feed/native-chart smoke checks. No funded trade was placed.
+
+## v0.7.75 — Main-chart draft dragging defaults on
+
+Enabled main-chart draft dragging for fresh or missing preferences. Explicit saved `drafts: false` remains off. Public wallet watching remains opt-in, and dragging still edits drafts only until Save / Arm.
