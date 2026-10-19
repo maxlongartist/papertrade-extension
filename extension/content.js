@@ -1,3 +1,4 @@
+import {mountChartAnalysis} from './chart-analysis.js';
 import {mountToolVisibility} from './tool-visibility.js';
 import {mountTradeTape} from './trade-tape-panel.js';
 import {mountWalletPanel} from './wallet-panel.js';
@@ -21,6 +22,7 @@ const publicQueueRelay=startPagePressureRelay(send,{isActive:()=>document.visibi
 document.addEventListener('visibilitychange',publicQueueRelay.tick);
 window.addEventListener('pagehide',()=>{document.removeEventListener('visibilitychange',publicQueueRelay.tick);publicQueueRelay.dispose();},{once:true});
 let setupReady=false,setupLoaded=false,setupHost,disposeSetup,monitorHost,disposeMonitor;
+let analysisHost,disposeAnalysis;
 let walletHost,disposeWallets,tapeHost,disposeTape,workspaceHost,toolVisibility;
 let queueHost,disposeQueue,host, pairHost, disposePair, dispose, disposePositions, route, positionsRoot, positionsObserver, positionTimer,conflictNotice;
 function showTradingWorkspace(){
@@ -29,7 +31,7 @@ function showTradingWorkspace(){
 }
 function syncRoute() {
   const match = /^\/trade\/([a-z][a-z0-9]{0,15})(\/|$)/.exec(location.pathname), panel = document.querySelector('#panelScroll');
-  if (!match || !panel) { toolVisibility?.refresh();if(workspaceHost){workspaceHost.hidden=true;workspaceHost.style.display='none';}disposeTape?.();disposeTape=null;tapeHost?.remove();disposeWallets?.();disposeWallets=null;walletHost?.remove();if(host){host.hidden=true;host.style.display='none';} if(pairHost)pairHost.hidden=true;if(queueHost)queueHost.hidden=true;if(monitorHost)monitorHost.hidden=true; return; }
+  if (!match || !panel) { disposeAnalysis?.();disposeAnalysis=null;analysisHost?.remove(); toolVisibility?.refresh();if(workspaceHost){workspaceHost.hidden=true;workspaceHost.style.display='none';}disposeTape?.();disposeTape=null;tapeHost?.remove();disposeWallets?.();disposeWallets=null;walletHost?.remove();if(host){host.hidden=true;host.style.display='none';} if(pairHost)pairHost.hidden=true;if(queueHost)queueHost.hidden=true;if(monitorHost)monitorHost.hidden=true; return; }
   if(!document.getElementById('paperpilot-layout')){
     const layout=document.createElement('style');layout.id='paperpilot-layout';
     // Native inline widths from the user's resize handle still take precedence.
@@ -49,7 +51,7 @@ function syncRoute() {
   }else if(conflictNotice)conflictNotice.hidden=true;
   toolVisibility??=mountToolVisibility({getAnchor:()=>/^\/trade\/[a-z][a-z0-9]{0,15}(\/|$)/.test(location.pathname)?document.querySelector('#panelScroll'):null});toolVisibility.refresh();
   if (!host || !host.isConnected || route !== market) {
-    workspaceHost?.remove();workspaceHost=null;disposeTape?.();disposeTape=null;tapeHost?.remove();disposeWallets?.();disposeWallets=null;walletHost?.remove();disposeMonitor?.();monitorHost?.remove();disposeQueue?.();queueHost?.remove();dispose?.();dispose=null;disposePositions?.();disposePair?.();pairHost?.remove(); host?.remove(); host = document.createElement('div'); host.id = 'paperpilot-extension';
+    disposeAnalysis?.();disposeAnalysis=null;analysisHost?.remove();workspaceHost?.remove();workspaceHost=null;disposeTape?.();disposeTape=null;tapeHost?.remove();disposeWallets?.();disposeWallets=null;walletHost?.remove();disposeMonitor?.();monitorHost?.remove();disposeQueue?.();queueHost?.remove();dispose?.();dispose=null;disposePositions?.();disposePair?.();pairHost?.remove(); host?.remove(); host = document.createElement('div'); host.id = 'paperpilot-extension';
     monitorHost=document.createElement('div');monitorHost.id='paperpilot-monitor';
     disposeMonitor=mountMonitor(monitorHost.attachShadow({mode:'closed'}),uiSend,()=>{let positionsReady=false,accountReady=false;try{assertFullPositions(document,{allowPending:true});positionsReady=true;}catch{}try{readAccount(document,market);accountReady=true;}catch{}return {market,positionsReady,accountReady,visible:document.visibilityState==='visible'};});
     queueHost=document.createElement('div');queueHost.id='paperpilot-network-queue';panel.append(queueHost);disposeQueue=mountCongestion(queueHost.attachShadow({mode:'closed'}),uiSend,{market});
@@ -64,6 +66,7 @@ function syncRoute() {
   if(!disposeWallets){walletHost=document.createElement('div');walletHost.id='paperpilot-wallets';panel.insertBefore(walletHost,monitorHost);disposeWallets=mountWalletPanel(walletHost.attachShadow({mode:'closed'}),{market,send:uiSend,getAccount:()=>readAccount(document,market),prepareDraft:['BTC','ETH'].includes(market)?p=>{toolVisibility?.show();showTradingWorkspace();return dispose.prepareWalletDraft(p);}:undefined,getTick:()=>dispose?.getTick?.(),isAvailable:()=>Boolean(chrome.runtime?.id),getDraft:()=>dispose?.getDraft?.(),setDraft:(...args)=>dispose?.setDraft?.(...args)});}
   if(!disposeTape){tapeHost=document.createElement('div');tapeHost.id='paperpilot-trade-tape';host.parentNode.insertBefore(tapeHost,host);disposeTape=mountTradeTape(tapeHost.attachShadow({mode:'closed'}),{market,compact:true,isAvailable:()=>Boolean(chrome.runtime?.id)});}
   if(!workspaceHost){workspaceHost=document.createElement('div');workspaceHost.id='paperpilot-trading-workspace';panel.insertBefore(workspaceHost,queueHost);workspaceHost.append(tapeHost,host);}
+  if(!disposeAnalysis){analysisHost=document.createElement('div');analysisHost.id='paperpilot-chart-analysis';panel.insertBefore(analysisHost,queueHost);disposeAnalysis=mountChartAnalysis(analysisHost.attachShadow({mode:'closed'}),{market});}
   showTradingWorkspace();monitorHost.hidden=false;
   pairHost.hidden=false;queueHost.hidden=false;
   const nextRoot=document.querySelector('#postable');

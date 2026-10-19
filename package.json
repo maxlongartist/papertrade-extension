@@ -1,6 +1,6 @@
 {
   "name": "papertrade-extension",
-  "version": "0.7.88",
+  "version": "0.7.89",
   "private": true,
   "type": "module",
   "scripts": {
@@ -46,7 +46,9 @@
     "verify:trade-tape": "node scripts/verify-trade-tape.mjs",
     "verify:public-tape": "node scripts/verify-public-tape.mjs",
     "verify:tool-visibility": "node scripts/verify-tool-visibility.mjs",
-    "verify:compact-ticket": "node scripts/verify-compact-ticket.mjs"
+    "verify:compact-ticket": "node scripts/verify-compact-ticket.mjs",
+    "verify:chart-analysis": "node scripts/verify-chart-analysis.mjs",
+    "verify:public-chart-analysis": "node scripts/verify-public-chart-analysis.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

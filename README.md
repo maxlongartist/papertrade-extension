@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.88).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.89).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -37,6 +37,20 @@ Stuck? See the short [installation help](https://github.com/maxlongartist/papert
 [![Network queue and Manual pair controls on Papertrade](https://raw.githubusercontent.com/maxlongartist/papertrade-extension/main/docs/images/manual-pair.png)](https://github.com/maxlongartist/papertrade-extension/blob/main/docs/images/manual-pair.png)
 
 The **Network queue** box estimates how busy Papertrade is. It does not tell you exactly when your trade will finish. A pair opens only when you click; it does not automatically repeat.
+
+## EMA, VWAP and the liquidation heatmap
+
+Find **Chart indicators** below the trading ticket. All three overlays start enabled for BTC and ETH. Use the checkboxes to hide any of them.
+
+- **EMA:** purple line, 20 candles by default. Change the period (2–200) in **Indicator settings & sources**.
+- **VWAP:** gold line, calculated from Hyperliquid candle typical prices and base volume, resetting at **midnight UTC**. The current candle is provisional. The interval selector (1m, 5m, 15m, 1h) applies to both indicators independently of the native chart.
+- **Liquidation map:** green bands for open longs and red bands for open shorts, with bars at the right of the chart showing USDC notional relative to the largest visible bucket. These are actual **Papertrade open-position buckets**, not a Hyperliquid liquidation estimate. **Auto** adapts the requested range to the visible price scale; a fixed range is also available.
+
+The map refreshes every 5 seconds; candles refresh every 15 seconds using incremental history requests after the initial load. The panel shows source age and the map's source block. Hidden tabs/tools pause these public requests; failed requests back off. Stale source data or unverified axes hide the affected overlays.
+
+**Press the native LIVE / RESET button to align indicator lines.** Lines require three matching time ticks in a live view narrower than a day; historical panned views, date-only ticks and ambiguous time axes hide the curves. The liquidation map follows the verified price scale even when the time view is panned. A line outside the native price range is reported in the panel; choose a wider native timeframe and return to LIVE to see it. Missing candles break EMA lines, and incomplete session volume hides VWAP.
+
+The heatmap is a **current snapshot projected across the chart**, not a history of liquidation changes, resting orders or a prediction. Positions outside the requested range are not drawn. Public data can be delayed. These overlays are read only and do not place trades or change your orders.
 
 ## Use the tape and trading ticket
 

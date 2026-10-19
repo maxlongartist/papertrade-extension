@@ -66,5 +66,5 @@ export function mountNativeOverlay({getLevels,getActivity=()=>[],getDraft,setDra
     if(focusKey){const target=[...root.querySelectorAll('[data-wallet-action-key]')].find(e=>e.getAttribute('data-wallet-action-key')===focusKey);target?.focus({preventScroll:true});}
   }
   document.documentElement.setAttribute('data-paperpilot-chart-enabled','true');
-  const timer=setInterval(render,200);render();return ()=>{disposed=true;clearInterval(timer);host?.remove();document.documentElement.removeAttribute('data-paperpilot-chart-enabled');document.querySelector('#cv')?.removeAttribute('data-paperpilot-axis');};
+  const timer=setInterval(render,200);render();return ()=>{disposed=true;clearInterval(timer);host?.remove();document.documentElement.removeAttribute('data-paperpilot-chart-enabled');if(document.documentElement.getAttribute('data-paperpilot-analysis-enabled')!=='true')document.querySelector('#cv')?.removeAttribute('data-paperpilot-axis');};
 }
