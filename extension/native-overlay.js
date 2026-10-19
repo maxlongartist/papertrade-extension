@@ -31,13 +31,13 @@ export function mountNativeOverlay({getLevels,getActivity=()=>[],getDraft,setDra
     for(const e of moves){const line=document.createElement('div');line.textContent=`${e.name} · ${e.action==='removed'?'no longer open':e.action.toUpperCase()} ${e.side} #${e.id} · $${e.entry.toLocaleString()}`;ticker.append(line);}
     for(const group of rows){
       const first=group.items[0],c=group.side==='mixed'?'#c6d6ed':color(first),g=node('g',{'data-wallet-level':'','data-wallet-address':first.address,style:'pointer-events:visiblePainted'});
-      g.append(node('line',{x1:0,x2:right,y1:group.y,y2:group.y,stroke:c,'stroke-opacity':'.6','stroke-dasharray':first.kind==='liquidation'?'2 5':'6 4'}));
+      svg.prepend(node('line',{x1:0,x2:right,y1:group.y,y2:group.y,stroke:c,'stroke-opacity':'.6','stroke-dasharray':first.kind==='liquidation'?'2 5':'6 4'}));
       const longs=group.items.filter(l=>l.side==='long').length,name=first.name||first.address.slice(0,6)+'…'+first.address.slice(-4);
       const description=group.items.length>1?`${longs}L/${group.items.length-longs}S · ${group.items.length} positions`:`${first.side==='long'?'LONG':'SHORT'} $${first.price.toLocaleString(undefined,{maximumFractionDigits:2})}`;
       const label=`${name.length>22?name.slice(0,21)+'…':name} · ${first.kind==='liquidation'?'Liq ':''}${description}`;
-      if(group.maxY>group.minY)g.append(node('rect',{x:0,y:group.minY,width:right,height:Math.max(2,group.maxY-group.minY),fill:c,'fill-opacity':'.15'}));
+      if(group.maxY>group.minY)svg.prepend(node('rect',{x:0,y:group.minY,width:right,height:Math.max(2,group.maxY-group.minY),fill:c,'fill-opacity':'.15'}));
       const labelWidth=Math.min(right-10,Math.max(160,label.length*6+10));
-      if(Math.abs(group.labelY-group.y)>1)g.append(node('line',{x1:labelWidth+6,x2:labelWidth+20,y1:group.labelY,y2:group.y,stroke:c,'stroke-opacity':'.7'}));
+      if(Math.abs(group.labelY-group.y)>1)svg.prepend(node('line',{x1:labelWidth+6,x2:labelWidth+20,y1:group.labelY,y2:group.y,stroke:c,'stroke-opacity':'.7'}));
       g.append(node('rect',{x:6,y:group.labelY-9,width:labelWidth,height:18,rx:3,fill:'#111b24','fill-opacity':'.94'}),node('text',{x:11,y:group.labelY+4,fill:c},label));
       g.append(node('title',{},group.items.map(l=>`${l.name||l.address}\n${l.address}\n${l.side} #${l.id} · ${l.leverage}× · $${l.notional.toLocaleString()} notional\n${l.kind} $${l.price}`).join('\n\n')));svg.append(g);
     }
