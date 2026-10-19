@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.85).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.86).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -59,7 +59,7 @@ Your saved entry appears under **Active orders**. Click **Cancel order** there t
 
 ## See who is trading
 
-The **Trade tape** below the wallet tools shows Papertrade’s public opens, closes and liquidations as they arrive. It works without connecting a wallet.
+Click **Trade tape** next to **Limit orders** to see Papertrade’s public opens, closes and liquidations as they arrive. Both tools share the same space, so you do not need to scroll past the wallet panels. It works without connecting a wallet.
 
 - Choose the current coin or **All markets**, then filter by trade type and minimum notional size.
 - Each row shows side, action, size, price, leverage, reported trade PnL and wallet. Wallet names load when available; click a wallet for its full address and position ID. Narrow sidebars put price, leverage and PnL on a second line.
