@@ -1,3 +1,4 @@
+import {createJournal} from './journal.js';
 import {createPrivateStorage,profileEncryptionKey} from './private-storage.js';
 import {setupAccepted,setupVersion,setupRequired} from './setup.js';
 import {createEntryCoordinator} from './entry-coordinator.js';
@@ -12,6 +13,7 @@ import { createEngine } from './engine.js';
 import { createManualPairs } from './manual-pair.js';
 import { validateManualTicket } from './manual-limits.js';
 const privateStorage=createPrivateStorage({storage:chrome.storage.local,crypto,getKey:profileEncryptionKey({indexedDB,crypto})});
+const journal=createJournal({storage:privateStorage,evidence:async()=>(await engine.request({type:'state'})).orders});
 const entryOperations=createEntryCoordinator();
 const pressureFeed=createPressureFeed();let statusReading=null,statusSourceTab=null,pageReading=null,pageSourceTab=null,pageSamples=[];
 const tabSessions=createTabBindings({
@@ -138,6 +140,10 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       return manageRecord(record,{tabs:chrome.tabs,windows:chrome.windows,bindings:tabSessions.snapshot()});
     }
     if(ownSite){const binding=await sourceBinding(sender.tab.id);message={...message,...binding};if(message.type==='create')message.order={...message.order,...binding};if(message.type==='check')message.order={...message.order,...binding};}
+    if(['journalRead','journalRefresh','journalNote','journalClear'].includes(message.type)){
+      if(!ownSite||typeof message.market!=='string'||!/^[A-Z][A-Z0-9]{0,15}$/.test(message.market))throw Error('Use the journal on your own Papertrade trading page.');
+      return journal.request(message,async()=>{const result=await pageMessage({...message,market:message.market},'pairIdentity');if(result.error||!result.ok)throw Error(result.error??'Wallet identity unavailable.');return result.owner;});
+    }
     if(['pairOpen','pairClose','pairState','pairInspect','pairRestore','pairHistory','pairTick'].includes(message.type)){
       if(!ownSite)throw Error('Use manual pair controls on the Papertrade page.');
       if(message.type==='pairTick'){await manualPairs.pulse();return {ok:true};}

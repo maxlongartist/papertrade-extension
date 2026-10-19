@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Papertrade \u00b7 Manual Pair & Limits",
-  "version": "0.7.75",
+  "version": "0.7.76",
   "minimum_chrome_version": "116",
   "description": "One-click manual long/short pairs, close-pair controls, limit entries and optional TP/SL on Papertrade.",
   "permissions": [

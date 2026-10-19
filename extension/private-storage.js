@@ -1,4 +1,4 @@
-const recordKeys=new Set(['manualPairsV1','limitOrdersV3','orders']);
+const recordKeys=new Set(['manualPairsV1','limitOrdersV3','orders','tradeJournalV1']);
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const bytesToText=bytes=>{const chunks=[];for(let i=0;i<bytes.length;i+=8192)chunks.push(String.fromCharCode(...bytes.subarray(i,i+8192)));return btoa(chunks.join(''));};
 const textToBytes=text=>Uint8Array.from(atob(text),c=>c.charCodeAt(0));

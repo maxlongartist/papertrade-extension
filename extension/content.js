@@ -54,7 +54,7 @@ function syncRoute() {
       disposePositions=mountPositionControls(document,uiSend,()=>dispose,{market});
     }
   }
-  if(!disposeWallets){walletHost=document.createElement('div');walletHost.id='paperpilot-wallets';panel.insertBefore(walletHost,monitorHost);disposeWallets=mountWalletPanel(walletHost.attachShadow({mode:'closed'}),{market,isAvailable:()=>Boolean(chrome.runtime?.id),getDraft:()=>dispose?.getDraft?.(),setDraft:(...args)=>dispose?.setDraft?.(...args)});}
+  if(!disposeWallets){walletHost=document.createElement('div');walletHost.id='paperpilot-wallets';panel.insertBefore(walletHost,monitorHost);disposeWallets=mountWalletPanel(walletHost.attachShadow({mode:'closed'}),{market,send:uiSend,getAccount:()=>readAccount(document,market),prepareDraft:['BTC','ETH'].includes(market)?p=>dispose.prepareWalletDraft(p):undefined,getTick:()=>dispose?.getTick?.(),isAvailable:()=>Boolean(chrome.runtime?.id),getDraft:()=>dispose?.getDraft?.(),setDraft:(...args)=>dispose?.setDraft?.(...args)});}
   monitorHost.hidden=false;
   host.hidden = !['BTC','ETH'].includes(market);
   pairHost.hidden=false;queueHost.hidden=false;

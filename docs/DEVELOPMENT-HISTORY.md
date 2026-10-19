@@ -580,3 +580,12 @@ Validation for v0.7.74: 386 automated tests, production build, browser replay of
 ## v0.7.75 — Main-chart draft dragging defaults on
 
 Enabled main-chart draft dragging for fresh or missing preferences. Explicit saved `drafts: false` remains off. Public wallet watching remains opt-in, and dragging still edits drafts only until Save / Arm.
+
+## v0.7.76 — Wallet trade context, selective alerts and local journal
+
+- Added compact wallet cards with current-asset net/paired exposure, leverage range and side-aware entry comparisons. Stale prices pause the comparison. Public closed-trade samples are loaded explicitly with honest coverage and a 20-record threshold for win-rate display. Samples do not establish a trading edge.
+- Wallet names open the context card. Prepare my entry draft uses the user's native margin/leverage, clears draft exits, preserves existing order/exit edits and never arms or submits.
+- Added per-wallet/event alert selection, minimum changed notional, cooldown and optional local Web Audio. Only incremental live updates notify; initial and reconnect snapshots do not. Audio failure cannot interrupt a position feed.
+- Added an own-wallet journal of venue-reported closed trades, exact adjusted-PnL-minus-fee accounting, separate PAPER amounts, user notes and manual wallet attribution. Matched entry targets require exact owner/market/side/position evidence. Imported results may include queued proceeds and exclude gas/transfer costs.
+- Journal records use profile encryption. Worker operations are serialized and verify own-account identity across asynchronous work; reads, imports, notes and clear are account-scoped. Capacity failures preserve notes. Unsaved note drafts survive local refresh; exports omit the owner field but still contain financial details. Clear requires two explicit clicks.
+- Validation covers financial math, stale references, protocol publication type, alert filtering/cooldown, encryption, routing/account changes, edit protection, no native trade dispatch, and browser fixtures for the complete UI. Real signed-out public feed/chart checks now also load public closed-trade history. No funded trade was placed or certified.

@@ -2,7 +2,7 @@
 
 **Independent beta.** Read the first-run notice before using the trading controls.
 
-Adds **Open long + short**, **Close pair**, **limit entries**, and **stop loss / take profit** to Papertrade.
+Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / take profit**, and wallet **Trade context** tools to Papertrade.
 
 ## Privacy
 
@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, and **stop loss /
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.75).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.76).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -73,6 +73,31 @@ These are public open positions from the selected wallets, not everyone’s orde
 If levels are missing, pan or zoom the native chart. The extension hides lines when it cannot verify the current price scale. Refresh Papertrade after updating the extension so the chart observer loads.
 
 Pair controls show an execution progress path, separate native clicks from identified positions, and flag incomplete pairs or one remaining leg. Exposure and PnL remain estimates; position disappearance is not proof of settlement.
+
+## Understand a wallet move before trading
+
+Click a wallet name in the position list to open **Trade context**. You can also expand that section and choose a wallet.
+
+- **Positioning:** see its net long/short exposure and how much is paired within that wallet. Hedges in other accounts are unknown.
+- **Compare an entry:** see the current mark compared with the watched entry, the position’s age, and when this page first saw it. “Worse” means a higher long entry or a lower short entry. A stale price pauses the comparison.
+- **Wallet closed-trade sample:** load recent records, then optionally load older ones. Results subtract the venue’s user-paid fees and keep PAPER separate. Statistics describe the loaded sample; win rate stays unavailable below 20 loaded closed trades.
+- **Prepare my entry draft:** fills the entry direction/price using your own native margin and leverage, with empty exits. Review it in the ticket and use **Set trigger** to arm it. Preparing a draft submits nothing and will not overwrite an existing order/exit edit.
+
+## Choose wallet alerts
+
+Open **Wallet alerts** and enable in-page alerts. Choose event types, a minimum changed notional and a cooldown. Under **Wallets & filters**, each wallet has its own **Alerts** checkbox.
+
+Alerts can cover new positions, positions no longer open, increases in gross exposure, and net direction reversals. Initial/reconnect snapshots do not trigger alerts. A removal does not tell us whether a position was manually closed or liquidated. Sounds are optional and require a click in the panel after refreshing. Keep the tab visible; these are browser alerts, not a background notification service.
+
+## Review your own results
+
+1. Connect your own wallet on Papertrade and expand **My local journal**.
+2. Click **Refresh venue history** to save recent closed trades locally. Use **Load older trades** for more history.
+3. Select a closed trade, optionally tag the wallet you followed, add notes, and click **Save note / attribution**.
+4. Review net trading results, user-paid venue fees, entry/exit prices and results grouped by your own tags. Entry deviation is shown only when an exact, unambiguous saved entry record can be matched to that position. A tag records your attribution; it does not establish that a wallet caused your result.
+5. **Export journal** downloads your saved records and notes. Review the file before sharing. **Clear saved journal for this wallet** requires a second click and removes only that wallet’s local journal.
+
+The journal uses the same profile encryption as trading records. It holds up to 1000 closed trades; imports stop at the limit rather than silently deleting notes. Net results cover the reported trade PnL and user-paid venue fee, excluding gas/transfer or unreported costs. Venue-reported PnL may include queued proceeds and is not proof of spendable balance. PAPER rewards are shown separately. Public data, sample statistics and wallet activity do not establish a profitable strategy.
 
 ## Keep this in mind
 
