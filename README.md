@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.86).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.87).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -56,6 +56,8 @@ Your saved entry appears under **Active orders**. Click **Cancel order** there t
 **Already have a position?** Click **Add/Edit SL/TP** on its row in Positions. Or expand **SL / TP for an existing position**, click **Load open positions**, choose yours, enter the exit prices, and click **Arm SL / TP on selected position**. This protects that position without opening another one. A price already past your exit level may cause an immediate Close request.
 
 *Screenshots show example settings. Click either picture to view it full-size.*
+
+**Hide the extension:** click **Hide tools** on the fixed button at the sidebar edge. It hides the extension panels and chart overlays; active order monitoring keeps running. The button changes to **Show tools** so you can bring everything back. Your choice is remembered across refreshes.
 
 ## See who is trading
 

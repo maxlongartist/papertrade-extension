@@ -1,3 +1,4 @@
+import {mountToolVisibility} from './tool-visibility.js';
 import {mountTradeTape} from './trade-tape-panel.js';
 import {mountWalletPanel} from './wallet-panel.js';
 import {mountMonitor} from './monitor.js';
@@ -20,7 +21,7 @@ const publicQueueRelay=startPagePressureRelay(send,{isActive:()=>document.visibi
 document.addEventListener('visibilitychange',publicQueueRelay.tick);
 window.addEventListener('pagehide',()=>{document.removeEventListener('visibilitychange',publicQueueRelay.tick);publicQueueRelay.dispose();},{once:true});
 let setupReady=false,setupLoaded=false,setupHost,disposeSetup,monitorHost,disposeMonitor;
-let walletHost,disposeWallets,tapeHost,disposeTape,toolTabs,activeTool='limits';
+let walletHost,disposeWallets,tapeHost,disposeTape,toolTabs,toolVisibility,activeTool='limits';
 let queueHost,disposeQueue,host, pairHost, disposePair, dispose, disposePositions, route, positionsRoot, positionsObserver, positionTimer,conflictNotice;
 function syncToolTabs(){
   const supported=['BTC','ETH'].includes(route);
@@ -30,7 +31,7 @@ function syncToolTabs(){
 }
 function syncRoute() {
   const match = /^\/trade\/([a-z][a-z0-9]{0,15})(\/|$)/.exec(location.pathname), panel = document.querySelector('#panelScroll');
-  if (!match || !panel) { if(toolTabs){toolTabs.hidden=true;toolTabs.style.display='none';}disposeTape?.();disposeTape=null;tapeHost?.remove();disposeWallets?.();disposeWallets=null;walletHost?.remove();if(host){host.hidden=true;host.style.display='none';} if(pairHost)pairHost.hidden=true;if(queueHost)queueHost.hidden=true;if(monitorHost)monitorHost.hidden=true; return; }
+  if (!match || !panel) { toolVisibility?.refresh();if(toolTabs){toolTabs.hidden=true;toolTabs.style.display='none';}disposeTape?.();disposeTape=null;tapeHost?.remove();disposeWallets?.();disposeWallets=null;walletHost?.remove();if(host){host.hidden=true;host.style.display='none';} if(pairHost)pairHost.hidden=true;if(queueHost)queueHost.hidden=true;if(monitorHost)monitorHost.hidden=true; return; }
   if(!document.getElementById('paperpilot-layout')){
     const layout=document.createElement('style');layout.id='paperpilot-layout';
     // Native inline widths from the user's resize handle still take precedence.
@@ -48,6 +49,7 @@ function syncRoute() {
     if(!conflictNotice.isConnected)panel.prepend(conflictNotice);conflictNotice.hidden=false;
     if(!pageInstance.claimed){route=market;return;}
   }else if(conflictNotice)conflictNotice.hidden=true;
+  toolVisibility??=mountToolVisibility({getAnchor:()=>/^\/trade\/[a-z][a-z0-9]{0,15}(\/|$)/.test(location.pathname)?document.querySelector('#panelScroll'):null});toolVisibility.refresh();
   if (!host || !host.isConnected || route !== market) {
     toolTabs?.remove();toolTabs=null;disposeTape?.();disposeTape=null;tapeHost?.remove();disposeWallets?.();disposeWallets=null;walletHost?.remove();disposeMonitor?.();monitorHost?.remove();disposeQueue?.();queueHost?.remove();dispose?.();dispose=null;disposePositions?.();disposePair?.();pairHost?.remove(); host?.remove(); host = document.createElement('div'); host.id = 'paperpilot-extension';
     monitorHost=document.createElement('div');monitorHost.id='paperpilot-monitor';
@@ -58,10 +60,10 @@ function syncRoute() {
     panel.append(host,monitorHost); route = market;
     if(['BTC','ETH'].includes(market)) {
       dispose = mountPanel(host.attachShadow({ mode: 'closed' }), uiSend, { market, getTicket: () => readTicket(document) });
-      disposePositions=mountPositionControls(document,uiSend,()=>{activeTool='limits';syncToolTabs();return dispose;},{market});
+      disposePositions=mountPositionControls(document,uiSend,()=>{toolVisibility?.show();activeTool='limits';syncToolTabs();return dispose;},{market});
     }
   }
-  if(!disposeWallets){walletHost=document.createElement('div');walletHost.id='paperpilot-wallets';panel.insertBefore(walletHost,monitorHost);disposeWallets=mountWalletPanel(walletHost.attachShadow({mode:'closed'}),{market,send:uiSend,getAccount:()=>readAccount(document,market),prepareDraft:['BTC','ETH'].includes(market)?p=>{activeTool='limits';syncToolTabs();return dispose.prepareWalletDraft(p);}:undefined,getTick:()=>dispose?.getTick?.(),isAvailable:()=>Boolean(chrome.runtime?.id),getDraft:()=>dispose?.getDraft?.(),setDraft:(...args)=>dispose?.setDraft?.(...args)});}
+  if(!disposeWallets){walletHost=document.createElement('div');walletHost.id='paperpilot-wallets';panel.insertBefore(walletHost,monitorHost);disposeWallets=mountWalletPanel(walletHost.attachShadow({mode:'closed'}),{market,send:uiSend,getAccount:()=>readAccount(document,market),prepareDraft:['BTC','ETH'].includes(market)?p=>{toolVisibility?.show();activeTool='limits';syncToolTabs();return dispose.prepareWalletDraft(p);}:undefined,getTick:()=>dispose?.getTick?.(),isAvailable:()=>Boolean(chrome.runtime?.id),getDraft:()=>dispose?.getDraft?.(),setDraft:(...args)=>dispose?.setDraft?.(...args)});}
   if(!disposeTape){tapeHost=document.createElement('div');tapeHost.id='paperpilot-trade-tape';panel.insertBefore(tapeHost,walletHost);disposeTape=mountTradeTape(tapeHost.attachShadow({mode:'closed'}),{market,isAvailable:()=>Boolean(chrome.runtime?.id)});}
   if(!toolTabs){
     toolTabs=document.createElement('div');toolTabs.id='paperpilot-tool-tabs';toolTabs.setAttribute('role','tablist');toolTabs.setAttribute('aria-label','Trading tools');toolTabs.style.cssText='display:flex;gap:6px;margin:14px 0 0';
