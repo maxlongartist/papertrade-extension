@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {closedTradePage,closedStats,tradeHistoryUrl,walletExposure,entryComparison,createAlertGate,walletAlertCandidates,walletAlertSummary,watchedExposure} from '../extension/trade-context-data.js';import {tradeRow} from './helpers/closed-trades-fixture.js';
+import {closedTradePage,closedStats,tradeHistoryUrl,walletExposure,entryComparison,createAlertGate,walletAlertCandidates,walletAlertSummary,watchedExposure,walletFeedHealth} from '../extension/trade-context-data.js';import {tradeRow} from './helpers/closed-trades-fixture.js';
 const address='0x'+'1'.repeat(40),pos=(patch={})=>({id:'1',market:'BTC',side:'long',entry:83000,notional:8300,margin:20,leverage:415,openedAt:100000,...patch});
 const tick={mid:83100,price:83100,bid:83099,ask:83101,sourceAt:200000,receivedAt:200000};
 test('venue history keeps exact fee subtraction, scale and PAPER separate',()=>{const data=closedTradePage({items:[tradeRow({adjustedPnlRaw:'1000000000000000001',userPaidFeeRaw:'1000000000000000000'})],nextCursor:null});assert.equal(data.items[0].netRaw,'1');assert.equal(data.items[0].entry,83000);assert.equal(data.items[0].exit,83100);assert.equal(data.items[0].paperRaw,'2000000000000000000');});
@@ -35,4 +35,15 @@ test('watched exposure explicitly distinguishes unavailable, partial, flat, pair
  const states=new Map([[address,live],[b,{...live,status:'retrying'}]]),partial=watchedExposure(wallets,states,'BTC',{now:1000});assert.equal(partial.status,'available');assert.equal(partial.missing,1);assert.equal(partial.counts.flat,1);assert.equal(partial.longShare,null);
  states.set(address,{...live,positions:[pos(),pos({id:'2',side:'short'})]});assert.equal(watchedExposure(wallets,states,'BTC',{now:1000}).counts.paired,1);assert.equal(watchedExposure(wallets,states,'BTC',{now:1000,enabled:false}).status,'off');assert.equal(watchedExposure(wallets,states,'BTC',{now:1000,enabled:false}).fresh,0);
  states.set(address,{...live,positions:[pos({entry:0})]});assert.equal(watchedExposure(wallets,states,'BTC',{now:1000}).status,'unavailable');
+});
+
+test('wallet feed health distinguishes fresh, stale, future, paused, disabled and unselected data',()=>{
+ const wallet={address},live={status:'live',receivedAt:1000,positions:[]},options={now:2500};
+ assert.deepEqual(walletFeedHealth(wallet,live,options),{status:'live',label:'Live',detail:'Feed received 1s ago.'});
+ for(const state of [{...live,receivedAt:3000},{...live,receivedAt:NaN},{...live,positions:undefined}])assert.equal(walletFeedHealth(wallet,state,options).status,'stale');assert.equal(walletFeedHealth(wallet,live,{now:31000}).status,'stale');
+ assert.equal(walletFeedHealth(wallet,live,{...options,visible:false}).status,'paused');assert.equal(walletFeedHealth(wallet,live,{...options,enabled:false}).status,'off');assert.equal(walletFeedHealth({...wallet,selected:false},live,options).status,'not_watched');assert.equal(walletFeedHealth(wallet,live,{...options,available:false}).status,'unavailable');
+});
+test('wallet feed health names pending connection and retries without a false zero-second countdown',()=>{
+ const wallet={address};assert.equal(walletFeedHealth(wallet,null).status,'waiting');assert.equal(walletFeedHealth(wallet,{status:'connecting'}).status,'connecting');
+ const state={status:'retrying',retryAt:3001,error:'Rate limited'},health=walletFeedHealth(wallet,state,{now:1000});assert.equal(health.label,'Retry in 3s');assert.equal(health.detail,'Rate limited');assert.equal(walletFeedHealth(wallet,state,{now:4000}).label,'Retry pending');assert.equal(walletFeedHealth(wallet,{...state,retryAt:NaN}).label,'Retry pending');assert.equal(walletFeedHealth(wallet,{...state,error:'x'.repeat(1000)}).detail.length,160);
 });

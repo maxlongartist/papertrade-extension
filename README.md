@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.81).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.82).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -87,13 +87,13 @@ Click a wallet name in the position list to open **Trade context**. You can also
 
 Wallet feeds reconnect automatically with increasing, staggered delays. A connection has to remain healthy for 30 seconds before its retry backoff resets. If a feed receives HTTP 429, other wallet-feed reconnects on the same page wait for the shared cooldown. Turning watching off and on, or rebuilding the panel on the same page, keeps that cooldown. Existing healthy streams continue running.
 
-The status line shows the retry reason and next attempt time. Missing feeds are excluded from **Watched exposure** until fresh snapshots arrive. A connection that sends only heartbeats without an initial snapshot times out after 30 seconds. These delays apply to optional public wallet feeds; they do not delay limit/SL/TP checks or native trading actions. Separate tabs have separate cooldowns.
+Open **Wallet feed health** to see each wallet’s live, connecting, stale, paused, not-watched or retrying state. A retry countdown and reason identify exactly which wallet is unavailable. The status line shows the retry reason and next attempt time. Missing feeds are excluded from **Watched exposure** until fresh snapshots arrive. A connection that sends only heartbeats without an initial snapshot times out after 30 seconds. These delays apply to optional public wallet feeds; they do not delay limit/SL/TP checks or native trading actions. Separate tabs have separate cooldowns.
 
 ## Inspect a wallet from the chart
 
 Click a wallet’s chart label to open **Trade context** for that position. Labels in **Outside price view** work too. You can also focus a label with Tab and press Enter or Space.
 
-A grouped label opens that wallet and explains how to choose a position under **Compare an entry**. If the inspected position closes or the wallet is no longer watched, the details stay unavailable until you choose another; they do not silently substitute a different position or wallet. Clicking a label only opens details—it does not change your ticket or submit a trade. Your own draft levels remain draggable.
+A grouped label opens that wallet and explains how to choose a position under **Compare an entry**. If the inspected position closes or the wallet is no longer watched, the details stay unavailable until you choose another; they do not silently substitute a different position or wallet. Clicking a label only opens details—it does not change your ticket or submit a trade. If **Prepare my entry draft** is disabled, the text beneath it explains why. Your own draft levels remain draggable.
 
 ## See the watched-wallet overview
 

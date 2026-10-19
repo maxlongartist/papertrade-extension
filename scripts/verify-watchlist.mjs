@@ -41,6 +41,9 @@ try{
  });
  const root=page.locator('#watch'),a='0x'+'a'.repeat(40),b='0x'+'b'.repeat(40);
  await root.locator('#status').filter({hasText:'1/1 wallet feeds live'}).waitFor();
+ await root.locator('#feedHealth').evaluate(el=>el.open=true);
+ assert.equal(await root.locator(`[data-health-wallet="${a}"] .health-label`).innerText(),'Live');assert.equal(await root.locator(`[data-health-wallet="${b}"] .health-label`).innerText(),'Not watched');assert.doesNotMatch(await root.locator('#feedHealthRows').innerText(),/No saved wallets/);
+ await root.locator('#enabled').focus();await page.keyboard.press('Tab');const filterSummary=root.getByText('Wallets & filters',{exact:true}),beforeFocus=await filterSummary.boundingBox();assert.equal(await filterSummary.evaluate(el=>el.getRootNode().activeElement===el),true);assert.equal(await filterSummary.evaluate(el=>getComputedStyle(el).outlineWidth),'2px');assert.equal((await filterSummary.boundingBox()).height,beforeFocus.height);
  await root.getByText('Wallets & filters',{exact:true}).click();
  await page.evaluate(()=>watchFixture.hold=true);await root.locator('#load').click();await page.waitForFunction(()=>watchFixture.pending);
  // A name being edited when the delayed leaderboard arrives must also survive.
@@ -73,15 +76,19 @@ try{
  await page.evaluate(()=>{watchFixture.rateLimitC=true;watchFixture.streams.get('0x'+'c'.repeat(40)).error(new Error('Fixture disconnect'));});
  await root.locator('#status').filter({hasText:'8/9 wallet feeds live'}).waitFor();
  await page.waitForFunction(count=>watchFixture.requests.filter(r=>r.url.includes('/state/user/live?wallet=0x'+'c'.repeat(40))).length>count,cRequestsBeforeFailure);
- await root.locator('#status').filter({hasText:'Rate limited'}).waitFor();
+ await root.locator('#status').filter({hasText:'Rate limited'}).waitFor(); await root.locator('#feedHealth').evaluate(el=>el.open=true);assert.equal(await root.locator(`[data-health-wallet="${a}"] .health-label`).innerText(),'Live');assert.match(await root.locator('[data-health-wallet="0x'+'c'.repeat(40)+'"] .health-label').innerText(),/Retry in/);assert.match(await root.locator('[data-health-wallet="0x'+'c'.repeat(40)+'"] .health-detail').innerText(),/Rate limited/);assert.equal(await root.locator(`[data-health-wallet="${a}"] .health-name`).innerText(),'My edited friend');
+
  const beforeCooldownRestart=await page.evaluate(()=>watchFixture.requests.filter(r=>r.url.startsWith('/state/user/live')).length);
  await root.locator('#enabled').uncheck();await root.locator('#enabled').check();await root.locator('#status').filter({hasText:'cooling down after rate limit'}).waitFor();
  assert.equal(await page.evaluate(()=>watchFixture.requests.filter(r=>r.url.startsWith('/state/user/live')).length),beforeCooldownRestart,'restarting the watch cannot bypass shared Retry-After');
  assert.match(await root.locator('#exposureCoverage').innerText(),/0\/9 selected feeds current/);assert.match(await root.locator('#exposureTotals').innerText(),/Waiting for fresh/);
  await page.evaluate(()=>{watchFixture.dispose();watchFixture.mount();});await root.locator('#status').filter({hasText:'cooling down after rate limit'}).waitFor();assert.equal(await page.evaluate(()=>watchFixture.requests.filter(r=>r.url.startsWith('/state/user/live')).length),beforeCooldownRestart,'rebuilding the panel on the same page cannot bypass the cooldown');
+ await root.locator('#feedHealth').evaluate(el=>el.open=true);assert.match(await root.locator(`[data-health-wallet="${a}"] .health-detail`).innerText(),/cooling down/);assert.equal(await root.locator(`[data-health-wallet="${b}"] .health-label`).innerText(),'Not watched');
  await page.screenshot({path:resolve(out,'cooldown.png')});await page.evaluate(()=>watchFixture.rateLimitC=false);await root.locator('#status').filter({hasText:'9/9 wallet feeds live'}).waitFor({timeout:12000});
  await root.locator('#exposureTotals').filter({hasText:'66.7% long by quantity'}).waitFor();
+ await root.locator(`[data-health-wallet="${a}"] .health-label`).filter({hasText:'Live'}).waitFor();await root.locator('#list button').first().click();assert.equal(await root.locator('#ctPrepare').isDisabled(),true);assert.match(await root.locator('#ctPrepareHint').innerText(),/unavailable in this view/);assert.equal(await root.locator('#ctPrepare').getAttribute('aria-describedby'),'ctPrepareHint');assert.equal(await root.locator('#ctPrepare').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(32, 43, 52)');
+ await root.locator('#ctPrepareHint').scrollIntoViewIfNeeded();await page.screenshot({path:resolve(out,'unavailable-draft.png')});
  await page.evaluate(()=>watchFixture.dispose());
- await writeFile(resolve(out,'verification.json'),JSON.stringify({passed:true,simulated:true,manualWalletPreserved:true,optOutsPreserved:true,alertsPreserved:true,pendingAliasPreserved:true,nameOnlyRefreshDoesNotRestartFeeds:true,tenWalletLimit:true,quantityBasedOverview:true,concentrationVisible:true,partialFeedCoverage:true,chartMinimumDoesNotHideHedges:true,choicesSurviveRemount:true,sharedCooldownSurvivesWatchRestart:true,sharedCooldownSurvivesPanelRemount:true,healthyFeedsRemainLiveDuringPeerRateLimit:true,recoveryAfterCooldown:true,venueWrites:0,fundedExecutionVerified:false},null,2));
+ await writeFile(resolve(out,'verification.json'),JSON.stringify({passed:true,simulated:true,manualWalletPreserved:true,optOutsPreserved:true,alertsPreserved:true,pendingAliasPreserved:true,nameOnlyRefreshDoesNotRestartFeeds:true,tenWalletLimit:true,quantityBasedOverview:true,concentrationVisible:true,partialFeedCoverage:true,chartMinimumDoesNotHideHedges:true,choicesSurviveRemount:true,sharedCooldownSurvivesWatchRestart:true,sharedCooldownSurvivesPanelRemount:true,healthyFeedsRemainLiveDuringPeerRateLimit:true,recoveryAfterCooldown:true,perWalletFeedHealth:true,keyboardFocusVisible:true,disabledDraftReasonVisible:true,venueWrites:0,fundedExecutionVerified:false},null,2));
  console.log('Watchlist preservation fixture passed.');
 }finally{await browser.close();}

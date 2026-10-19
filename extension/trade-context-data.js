@@ -29,14 +29,34 @@ export function walletExposure(positions,market){
   const gross=long+short,net=long-short,paired=gross?2*Math.min(long,short)/gross:0;
   return {count:rows.length,long,short,net,paired,bias:!gross?'flat':Math.abs(net)/gross<.1?'paired':net>0?'net long':'net short',leverageMin:rows.length?Math.min(...rows.map(p=>p.leverage)):null,leverageMax:rows.length?Math.max(...rows.map(p=>p.leverage)):null};
 }
+export function isFreshWalletState(state,now=Date.now()){
+  const age=now-state?.receivedAt;
+  return state?.status==='live'&&Array.isArray(state.positions)&&Number.isFinite(age)&&age>=0&&age<30000;
+}
+export function walletFeedHealth(wallet,state,{now=Date.now(),enabled=true,visible=true,available=true}={}){
+  if(!available)return {status:'unavailable',label:'Refresh needed',detail:'Extension connection was reset. Refresh Papertrade.'};
+  if(!enabled)return {status:'off',label:'Off',detail:'Public wallet watching is off.'};
+  if(wallet.selected===false)return {status:'not_watched',label:'Not watched',detail:'Enable this wallet under Wallets & filters to receive its positions.'};
+  if(!visible)return {status:'paused',label:'Paused',detail:'Public feeds pause while this tab is hidden.'};
+  if(state?.status==='live'){
+    const age=now-state.receivedAt;
+    if(isFreshWalletState(state,now))return {status:'live',label:'Live',detail:`Feed received ${Math.floor(age/1000)}s ago.`};
+    return {status:'stale',label:'Stale',detail:'No current wallet data. This feed is excluded from exposure totals.'};
+  }
+  if(state?.status==='retrying'){
+    const remaining=Number.isFinite(state.retryAt)?Math.max(0,Math.ceil((state.retryAt-now)/1000)):null,error=typeof state.error==='string'?state.error.slice(0,160):'Public feed disconnected';
+    return {status:'retrying',label:remaining>0?`Retry in ${remaining}s`:'Retry pending',detail:error};
+  }
+  return state?.status==='connecting'?{status:'connecting',label:'Connecting',detail:'Waiting for the initial wallet snapshot.'}:{status:'waiting',label:'Waiting',detail:'Waiting for public wallet data.'};
+}
 // Exposure is a sample of opted-in wallets, never a market-wide signal.
 export function watchedExposure(wallets,states,market,{now=Date.now(),enabled=true}={}){
   const unique=new Map(wallets.filter(w=>w.selected!==false).map(w=>[w.address,w]));
   const result={status:enabled?'unavailable':'off',selected:unique.size,fresh:0,missing:unique.size,positions:0,long:0,short:0,net:0,longShare:null,largestShare:null,largestAddress:null,counts:{long:0,short:0,paired:0,flat:0}};
   if(!enabled)return result;let largest=0;
   for(const address of unique.keys()){
-    const state=states.get(address),age=now-state?.receivedAt;
-    if(state?.status!=='live'||!Number.isFinite(age)||age<0||age>=30000||!Array.isArray(state.positions))continue;
+    const state=states.get(address);
+    if(!isFreshWalletState(state,now))continue;
     const rows=state.positions.filter(p=>p.market===market);
     if(rows.some(p=>!['long','short'].includes(p.side)||!Number.isFinite(p.notional)||p.notional<0||!Number.isFinite(p.entry)||p.entry<=0||!Number.isFinite(p.notional/p.entry)))continue;
     const exposure=walletExposure(rows,market),gross=exposure.long+exposure.short;

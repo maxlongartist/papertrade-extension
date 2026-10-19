@@ -15,6 +15,14 @@ The connected wallet comes from Papertrade’s native wallet control and is chec
 
 The two opens are separate requests, not atomic. Equal margin and leverage can leave a small quantity mismatch when fill prices differ. Prices and fills are not guaranteed, and cash break-even is not guaranteed. A submitted entry/Close is never blindly repeated after a missing response. Unknown entries without an identified fill remain unresolved rather than pretending that an empty position list proves cancellation. Check native Status if a request stays uncertain. Chrome worker/page reloads retain tracking within the same browser tab session; a full browser restart can invalidate the original tab binding. The new Restore control can reconnect previously identified native position IDs after checking the same wallet and market. It never guesses an unbound entry or sends trades while restoring.
 
+## v0.7.82 — Explain feed health and unavailable controls
+
+- Added a compact per-wallet feed-health section with wallet names, live/stale/connecting/paused/not-watched states, retry countdowns and failure reasons. Stable row nodes preserve scrolling through normal updates.
+- Shared freshness checks now keep chart levels, observed moves, trade context, aggregate exposure and health labels consistent. Future-dated or 30-second-stale observations are not current.
+- Disabled wallet controls have a distinct readable appearance; keyboard focus has a visible outline. Draft preparation shows an associated explanation when unavailable.
+- Removed the ticking clock from the announced wallet-status text to avoid repeating an unchanged status every second to screen readers. Receive ages and retry countdowns remain available in feed health.
+- Validation: 417 tests, production build and browser checks for wallet health, cooldown/recovery, exact chart selection, draft isolation, disabled hints and keyboard focus. No funded execution.
+
 ## v0.7.81 — Recover wallet feeds without retry storms
 
 - A single snapshot no longer resets exponential backoff on flapping streams. Observed stream health for 30 seconds resets it; bounded upward jitter staggers retries.
