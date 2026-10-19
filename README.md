@@ -2,7 +2,7 @@
 
 **Independent beta.** Read the first-run notice before using the trading controls.
 
-Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / take profit**, and wallet **Trade context** tools to Papertrade.
+Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / take profit**, **live trade tape**, and wallet **Trade context** tools to Papertrade.
 
 ## Privacy
 
@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.84).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.85).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -55,7 +55,18 @@ Your saved entry appears under **Active orders**. Click **Cancel order** there t
 
 **Already have a position?** Click **Add/Edit SL/TP** on its row in Positions. Or expand **SL / TP for an existing position**, click **Load open positions**, choose yours, enter the exit prices, and click **Arm SL / TP on selected position**. This protects that position without opening another one. A price already past your exit level may cause an immediate Close request.
 
-*Screenshots show v0.7.63 with example settings. Click either picture to view it full-size.*
+*Screenshots show example settings. Click either picture to view it full-size.*
+
+## See who is trading
+
+The **Trade tape** below the wallet tools shows Papertrade’s public opens, closes and liquidations as they arrive. It works without connecting a wallet.
+
+- Choose the current coin or **All markets**, then filter by trade type and minimum notional size.
+- Each row shows side, action, size, price, leverage, reported trade PnL and wallet. Wallet names load when available; click a wallet for its full address and position ID. Narrow sidebars put price, leverage and PnL on a second line.
+- **Pause** freezes the display while new events continue buffering. **Resume** shows the latest rows. **Live feed** disconnects or reconnects the tape. Hidden tabs stop receiving events.
+- Last-minute long/short totals follow your filters. They include exits when those are selected; they are not a buy/sell signal. Initial coverage and connection gaps are labeled partial. There is no history backfill.
+
+The tape keeps recent events in page memory, shows up to 200 rows and saves only your display preferences locally. It cannot place or copy a trade.
 
 ## See public wallet positions on the chart
 

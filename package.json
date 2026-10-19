@@ -1,6 +1,6 @@
 {
   "name": "papertrade-extension",
-  "version": "0.7.84",
+  "version": "0.7.85",
   "private": true,
   "type": "module",
   "scripts": {
@@ -42,7 +42,9 @@
     "verify:trade-context": "node scripts/verify-trade-context.mjs",
     "verify:watchlist": "node scripts/verify-watchlist.mjs",
     "verify:watchlist-backup": "node scripts/verify-watchlist-backup.mjs",
-    "verify:liquidation": "node scripts/verify-liquidation.mjs"
+    "verify:liquidation": "node scripts/verify-liquidation.mjs",
+    "verify:trade-tape": "node scripts/verify-trade-tape.mjs",
+    "verify:public-tape": "node scripts/verify-public-tape.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"
