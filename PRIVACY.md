@@ -1,6 +1,6 @@
 # Privacy policy — Papertrade Manual Pair & Limits
 
-Effective date: October 19, 2026
+Effective date: October 20, 2026
 
 This independent extension adds manual pair controls and conditional trading tools to Papertrade. It is not an official Papertrade or Hyperliquid product. The developer is the GitHub account [maxlongartist](https://github.com/maxlongartist). Questions and privacy requests can be made through [the project's support page](https://github.com/maxlongartist/papertrade-extension/issues). Do not post private keys, seed phrases, account screenshots, or sensitive trading details in a public issue.
 
@@ -30,9 +30,11 @@ Older plaintext trading records are migrated to the encrypted format before they
 
 Records remain in that profile until changed or removed through normal use or removal of extension storage. Browser-session bindings may expire when the browser restarts. History exported by you is a separate plaintext JSON file: financial details and position IDs may remain in that file even when wallet/routing identifiers are omitted. Review it before sharing and delete exported files separately when no longer needed.
 
+The optional liquidation heatmap requests Hyperliquid position snapshots from the third-party indexer LiqFlow (`node.liqflow.app`). Requests include the selected market, not your Papertrade wallet, positions, balance or orders. The provider receives normal connection information, including your IP address. If you enter a LiqFlow read-only data API key, it is stored unencrypted in local extension storage and sent only to that provider in an API header. It is not a wallet key and grants no trading authority. It is excluded from wallet-list backups and trade history exports. Clear it by saving an empty data-key field. Heatmap snapshots remain in page memory and requests pause in hidden tabs/tools. The developer receives none of these requests or keys.
+
 ## Network connections and sharing
 
-The extension connects to Papertrade (`exchange.papertrade.xyz`, `stream.papertrade.xyz`) and Hyperliquid (`api.hyperliquid.xyz`) for public market/venue/queue data and, if enabled, public leaderboard, wallet-position and closed-trade history data. Requested public wallet addresses are sent to Papertrade to obtain those positions. These services receive normal network connection information, including the connecting IP address and requested market subscriptions. Their own policies govern their services.
+The extension connects to Papertrade (`exchange.papertrade.xyz`, `stream.papertrade.xyz`) and Hyperliquid (`api.hyperliquid.xyz`) for public market/venue/queue data and, if enabled, public leaderboard, wallet-position and closed-trade history data. Requested public wallet addresses are sent to Papertrade to obtain those positions. The Hyperliquid liquidation overlay additionally uses LiqFlow as disclosed above. These services receive normal network connection information, including the connecting IP address and requested market subscriptions. Their own policies govern their services.
 
 When you configure a trading action, the extension operates Papertrade's native page controls. Papertrade and your wallet handle the resulting authorization and trading requests and receive the information needed for those requests. The extension does not provide a separate withdrawal or payment flow. The donation button only copies a public address.
 

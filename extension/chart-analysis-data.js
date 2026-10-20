@@ -1,6 +1,6 @@
 // Display-only calculations. No execution authority or inferred liquidation levels.
 export const intervals={'1m':60000,'5m':300000,'15m':900000,'1h':3600000};
-export const mapMarkets={BTC:{id:0,scale:10},ETH:{id:1,scale:100}};
+export const analysisMarkets={BTC:true,ETH:true};
 export function analysisSettings(value={}){
   return {ema:value.ema!==false,vwap:value.vwap!==false,heatmap:value.heatmap!==false,period:Number.isInteger(value.period)&&value.period>=2&&value.period<=200?value.period:20,interval:Object.hasOwn(intervals,value.interval)?value.interval:'1m',range:['auto','0.1','0.25','0.5','1','2','5','10','25'].includes(value.range)?value.range:'auto'};
 }
@@ -27,13 +27,6 @@ export function indicatorSeries(candles,period,interval,now=Date.now()){
   }
   const last=candles.at(-1);if(last&&last.T>=now)for(const values of [ema,vwap])if(values.length&&values.at(-1).time<now)values.push({...values.at(-1),time:now,break:false});
   return {ema,vwap};
-}
-const uint=x=>typeof x==='string'&&/^\d{1,78}$/.test(x);
-function bucket(raw){if(!Array.isArray(raw)||raw.length!==4||!raw.slice(0,2).every(uint)||!raw.slice(2).every(x=>Number.isSafeInteger(x)&&x>=0))throw Error('Invalid liquidation bucket');const long=Number(raw[0])/1e18,short=Number(raw[1])/1e18;if(!Number.isFinite(long+short)||long>1e18||short>1e18||(long===0)!==(raw[2]===0)||(short===0)!==(raw[3]===0))throw Error('Invalid liquidation size');return {long,short,longCount:raw[2],shortCount:raw[3]};}
-export function parseLiquidationMap(raw,market,range,now=Date.now()){
-  const m=mapMarkets[market];if(!m||raw?.ok!==true||raw.instrumentId!==m.id||raw.range!==range||!uint(raw.priceScale)||Number(raw.priceScale)!==m.scale||!uint(raw.fromRaw)||!uint(raw.toRaw)||!Array.isArray(raw.buckets)||raw.buckets.length!==150||!uint(raw.source?.block)||!Number.isSafeInteger(raw.source.at)||!Number.isSafeInteger(raw.source.priceAt)||Math.max(raw.source.at,raw.source.priceAt)>now+5000||Math.min(raw.source.at,raw.source.priceAt)<now-60000)throw Error('Invalid or stale liquidation map');
-  const from=Number(raw.fromRaw)/m.scale,to=Number(raw.toRaw)/m.scale;if(!(from>0&&to>from&&Number.isFinite(to)))throw Error('Invalid liquidation price range');
-  return {from,to,range,at:raw.source.at,priceAt:raw.source.priceAt,block:raw.source.block,buckets:raw.buckets.map((b,i)=>({...bucket(b),low:from+(to-from)*i/150,high:from+(to-from)*(i+1)/150})),below:bucket(raw.below),above:bucket(raw.above)};
 }
 // The native chart uses local HH:mm[:ss] ticks. Resolve only a live, sub-day
 // time scale, with 3+ agreeing ticks; never guess dates on a panned chart.

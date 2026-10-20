@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Papertrade \u00b7 Manual Pair & Limits",
-  "version": "0.7.90",
+  "version": "0.7.91",
   "minimum_chrome_version": "116",
   "description": "Manual long/short pairs, conditional entries, SL/TP, live trade tape and public-wallet chart levels on Papertrade.",
   "permissions": [
@@ -11,7 +11,8 @@
   "host_permissions": [
     "https://exchange.papertrade.xyz/*",
     "https://api.hyperliquid.xyz/*",
-    "https://stream.papertrade.xyz/*"
+    "https://stream.papertrade.xyz/*",
+    "https://node.liqflow.app/*"
   ],
   "background": {
     "service_worker": "worker.js",

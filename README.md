@@ -6,13 +6,13 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Privacy
 
-**We do not collect your data.** There is no developer analytics, telemetry, advertising tracking, or automatic upload of wallet details or trading history. The extension reads the Papertrade page to operate your controls and stores trading records locally in your browser. Papertrade and Hyperliquid receive the normal requests needed to provide their services; anything you voluntarily share in a support report is separate.
+**We do not collect your data.** There is no developer analytics, telemetry, advertising tracking, or automatic upload of wallet details or trading history. The extension reads the Papertrade page to operate your controls and stores trading records locally in your browser. Papertrade, Hyperliquid and the LiqFlow heatmap provider receive the requests needed to provide their services; anything you voluntarily share in a support report is separate.
 
 **Execution depends on Papertrade congestion.** A trigger reaching its price does not mean the trade has filled. Busy queues can delay entries, pair opens/closes, stop losses and take profits; prices can move or liquidation can happen before execution. The extension cannot bypass the queue or guarantee a price or execution time.
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.90).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.91).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -52,9 +52,11 @@ Find **Chart indicators** below the trading ticket. All three overlays start ena
 
 - **EMA:** purple line, 20 candles by default. Change the period (2–200) in **Indicator settings & sources**.
 - **VWAP:** gold line, calculated from Hyperliquid candle typical prices and base volume, resetting at **midnight UTC**. The current candle is provisional. The interval selector (1m, 5m, 15m, 1h) applies to both indicators independently of the native chart.
-- **Liquidation map:** green bands for open longs and red bands for open shorts, with bars at the right of the chart showing USDC notional relative to the largest visible bucket. These are actual **Papertrade open-position buckets**, not a Hyperliquid liquidation estimate. **Auto** adapts the requested range to the visible price scale; a fixed range is also available.
+- **Liquidation map:** green bands for open longs and red bands for open shorts, with bars at the right of the chart showing USDC notional relative to the largest visible bucket. These are **Hyperliquid liquidation buckets indexed by [LiqFlow’s node service](https://liqflow.app/docs)**. No Papertrade liquidation data is used or substituted. **Auto** adapts the displayed range to the visible price scale; a fixed range is also available. Provider buckets can be coarse (for example, hundreds of dollars wide for BTC); their original resolution is preserved rather than inventing precise levels.
 
-The map refreshes every 5 seconds; candles refresh every 15 seconds using incremental history requests after the initial load. The panel shows source age and the map's source block. Hidden tabs/tools pause these public requests; failed requests back off. Stale source data or unverified axes hide the affected overlays.
+The map polls every **5 minutes**, matching the provider’s approximate snapshot cadence; candles refresh every 15 seconds using incremental history requests after the initial load. The panel shows the actual snapshot age. Snapshots older than 15 minutes, malformed responses, denied access and failed map requests hide the map. Hidden tabs/tools pause these public requests; failed requests back off. Stale source data or unverified axes hide the affected overlays.
+
+**Data key:** Open **Indicator settings & sources → LiqFlow data API key** to save a free read-only data key from [LiqFlow](https://liqflow.app/developers). This is separate from any wallet key. It stays in local browser storage and is sent only to `node.liqflow.app` in an API header. The provider begins requiring keys on **October 27, 2026**, with unauthenticated requests always refused from **November 1**. Without access, the heatmap shows an error; it never substitutes Papertrade data.
 
 **Press the native LIVE / RESET button to align indicator lines.** Lines require three matching time ticks in a live view narrower than a day; historical panned views, date-only ticks and ambiguous time axes hide the curves. The liquidation map follows the verified price scale even when the time view is panned. A line outside the native price range is reported in the panel; choose a wider native timeframe and return to LIVE to see it. Missing candles break EMA lines, and incomplete session volume hides VWAP.
 

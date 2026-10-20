@@ -56,3 +56,5 @@ Do not certify the final dashboard statements blindly. Verify them against PRIVA
 Start with an unlisted beta or a restricted tester group, depending on available dashboard controls. Unlisted is not access control: a recipient may forward the link. Leave submission and public availability pending owner review.
 
 Reviewer steps: open a BTC/ETH Papertrade page, read/agree to setup, inspect the data/Positions status, and open the toolbar overview. Wallet authorization and funded position execution require a reviewer-controlled account; no private key or funded test credential is supplied. Simulated tests and a manual validation checklist are in this repository.
+
+The optional liquidation heatmap uses Hyperliquid node snapshots indexed by LiqFlow, a separate third-party data provider. Its source and snapshot age are displayed; provider buckets are preserved, and the map never substitutes Papertrade positions. It requires access to node.liqflow.app and supports a user-supplied read-only provider data key stored locally. Provider errors and stale data hide the map. No developer analytics or telemetry is added.
