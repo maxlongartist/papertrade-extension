@@ -16,3 +16,9 @@ export function chartMoveRisk(draft) {
   };
   return {loss:estimate(draft.stopLoss),gain:estimate(draft.takeProfit)};
 }
+// Gross move PnL at the requested TP, not net settlement or a promised fill.
+export function takeProfitEstimate(draft){
+  if(!draft||!['long','short'].includes(draft.side)||![draft.price,draft.takeProfit,draft.margin].every(n=>Number.isFinite(n)&&n>0)||!Number.isInteger(draft.leverage)||draft.leverage<1)return null;
+  const pnl=(draft.takeProfit-draft.price)/draft.price*draft.margin*draft.leverage*(draft.side==='long'?1:-1);
+  return Number.isFinite(pnl)?pnl:null;
+}

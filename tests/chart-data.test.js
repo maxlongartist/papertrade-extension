@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {chartQuoteView,chartMoveRisk} from '../extension/chart-data.js';
+import {chartQuoteView,chartMoveRisk,takeProfitEstimate} from '../extension/chart-data.js';
 const now=100000,tick=()=>({mid:83000,price:83001,bid:82999,ask:83001,sourceAt:now,receivedAt:now});
 test('chart reference uses a verified recent position mark',()=>{assert.deepEqual(chartQuoteView(tick(),now),{status:'current',price:83000});});
 test('either aged source or receipt removes the reference at the display freshness boundary',()=>{
@@ -20,3 +20,7 @@ test('invalid or incomplete sizing never yields NaN or infinite chart risk',()=>
 test('one missing exit level does not suppress the other valid draft estimate',()=>{
  assert.deepEqual(chartMoveRisk({price:80000,margin:25,leverage:400,stopLoss:null,takeProfit:81000}),{loss:null,gain:125});
 });
+
+test('TP profit uses side, entry and leveraged margin including the screenshot short',()=>{assert.ok(Math.abs(takeProfitEstimate({side:'short',price:84600,takeProfit:84009.88,margin:50,leverage:500})-174.3853427895981)<1e-8);assert.equal(takeProfitEstimate({side:'long',price:80000,takeProfit:80800,margin:50,leverage:100}),50);});
+test('TP profit stays signed when a requested target would lose money',()=>{assert.equal(takeProfitEstimate({side:'short',price:80000,takeProfit:80800,margin:50,leverage:100}),-50);assert.equal(takeProfitEstimate({side:'long',price:80000,takeProfit:79200,margin:50,leverage:100}),-50);});
+test('TP profit refuses unknown side, incomplete terms and overflow',()=>{const d={side:'long',price:80000,takeProfit:81000,margin:50,leverage:100};for(const patch of [{side:undefined},{price:0},{takeProfit:null},{margin:NaN},{leverage:1.5},{margin:Number.MAX_VALUE}])assert.equal(takeProfitEstimate({...d,...patch}),null);assert.equal(takeProfitEstimate(null),null);});

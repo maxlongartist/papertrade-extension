@@ -12,7 +12,7 @@ Adds **Open long + short**, **Close pair**, **limit entries**, **stop loss / tak
 
 ## Install it — no coding needed
 
-1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.91).**
+1. **[Open the download page](https://github.com/maxlongartist/papertrade-extension/releases/tag/v0.7.92).**
 2. Under **Assets**, download the file named **`papertrade-manual-pair-v….zip`**. Skip the files called “Source code.”
 3. **Unzip it.** Move the extracted folder somewhere you can keep it, such as Documents.
 4. Open Chrome. Type **`chrome://extensions`** into the address bar and press Enter.
@@ -111,7 +111,7 @@ Wallets use their public Papertrade name when available, otherwise a short addre
 
 These are public open positions from the selected wallets, not everyone’s orders. Their private SL/TP settings are unavailable. Rankings are snapshots of Papertrade’s windowed PnL and do not predict performance. Updates pause in hidden tabs; stale or disconnected feeds are hidden from the chart. The list still works when chart mapping is unavailable. No developer collects this data.
 
-**Want to move your own levels?** **Drag my ticket drafts on main chart** is enabled by default. You can turn it off; saved choices are preserved. Enter draft prices in Limit entry (or select your existing position’s exits), then drag Entry, SL or TP on the main chart. You can focus a handle and use ↑/↓ for $1 changes. Hold Shift while dragging for finer changes. **Dragging does not save or arm an order.** Use the ticket’s Save / Set trigger / Arm button when ready. Existing position entry prices cannot be moved.
+**Want to move your own levels?** **Drag my ticket drafts on main chart** is enabled by default. You can turn it off; saved choices are preserved. Enter draft prices in Limit entry (or select your existing position’s exits), then drag Entry, SL or TP on the main chart. You can focus a handle and use ↑/↓ for $1 changes. Hold Shift while dragging for finer changes. **Dragging does not save or arm an order.** Use the ticket’s Save / Set trigger / Arm button when ready. Existing position entry prices cannot be moved. The TP line also shows estimated gross profit at that exact target, updated as you drag or change size, leverage or direction. This excludes fees, early exit lead and slippage; actual profit can differ. Missing size information shows an unavailable estimate.
 
 If levels are missing, pan or zoom the native chart. The extension hides lines when it cannot verify the current price scale. Refresh Papertrade after updating the extension so the chart observer loads.
 

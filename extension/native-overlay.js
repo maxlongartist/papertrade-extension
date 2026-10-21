@@ -1,3 +1,4 @@
+import {takeProfitEstimate} from './chart-data.js';
 import {fitAxis,namedWalletGroups,labelRows} from './wallet-data.js';
 const ns='http://www.w3.org/2000/svg';
 const color=l=>l.kind==='liquidation'?'#e9b968':l.side==='long'?'#77dfa0':'#ff9b9b';
@@ -55,7 +56,11 @@ export function mountNativeOverlay({getLevels,getActivity=()=>[],getDraft,setDra
     if(draft)for(const [field,label,c]of [['price','Entry','#bedffc'],['stopLoss','SL','#ff9b9b'],['takeProfit','TP','#77dfa0']]){
       const price=draft[field],y=axis.slope*price+axis.intercept;if(!Number.isFinite(price)||price<=0||y<12||y>height-12)continue;
       const editable=!(field==='price'&&(draft.mode==='position'||draft.priceEditable===false)),g=node('g',editable?{'data-draft':field,tabindex:0,role:'slider','aria-label':label+' draft on main chart','aria-valuenow':price,'aria-valuemin':'.01','aria-valuemax':'10000000',style:'pointer-events:visiblePainted;cursor:ns-resize'}:{});
-      const x=Math.max(6,right-194);svg.prepend(node('line',{'data-draft-line':field,x1:0,x2:right,y1:y,y2:y,stroke:c,'stroke-width':2}));g.append(node('rect',{x,y:y-10,width:188,height:20,rx:3,fill:'#162c3a'}),node('text',{x:x+5,y:y+4,fill:c},`${label} $${price.toFixed(2)} · ${editable?'DRAFT':'position'}`),node('title',{},'Dragging changes the ticket draft only. Save/arm in the ticket to apply.'));svg.append(g);
+      const estimate=field==='takeProfit'?takeProfitEstimate(draft):null;
+      const amount=estimate==null?'—':`${estimate<0?'−':'+'}$${Math.abs(estimate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+      const caption=`${label} $${price.toFixed(2)}${field==='takeProfit'?' · EST '+amount+' gross':''} · ${editable?'DRAFT':'position'}`;
+      const width=Math.min(Math.max(0,right-12),field==='takeProfit'?Math.max(188,caption.length*6.3+10):188),x=Math.max(6,right-width-6);
+      svg.prepend(node('line',{'data-draft-line':field,x1:0,x2:right,y1:y,y2:y,stroke:c,'stroke-width':2}));g.append(node('rect',{x,y:y-10,width,height:20,rx:3,fill:'#162c3a'}),node('text',{x:x+5,y:y+4,fill:c,...(field==='takeProfit'?{'data-tp-estimate':''}:{})},caption),node('title',{},(field==='takeProfit'?'Gross estimated PnL at the exact requested TP using entry, margin and leverage. Excludes fees, early exit lead and slippage; actual fills differ and liquidation may occur first. ':'')+'Dragging changes the ticket draft only. Save/arm in the ticket to apply.'));svg.append(g);
     }
     if(Number.isFinite(draft?.liquidationPrice)&&draft.liquidationPrice>0){
       const price=draft.liquidationPrice,y=axis.slope*price+axis.intercept;
